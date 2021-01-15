@@ -1,5 +1,6 @@
 class Person:
     def __init__(self, surname='Blank', age=10):
+        print('----> Вызван конструктор класса Person') # для демонстрации вызова родительского класса при наследовании
         if str != type(surname):
             raise TypeError('Некорректный тип данных для фамилии')
         if int != type(age):
@@ -23,7 +24,7 @@ class Person:
 
     @age.setter # сеттер для возраста
     def age(self, new_age):
-        if int != new_age: raise TypeError('Некорректный тип данных для фамилии')
+        if int !=  type(new_age): raise TypeError('Некорректный тип данных для возраста')
         if new_age in range(1, 100):
             self.__age = new_age
         else:

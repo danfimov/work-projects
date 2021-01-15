@@ -1,8 +1,12 @@
 import os
-for top, dirs, files in os.walk('/Users/mrrobot/PycharmProjects/pythonProject1'):
+
+# можно задать свою директорию с проектом
+for top, dirs, files in os.walk('/Users/mrrobot/PycharmProjects/pythonProject1'): # ходим по внутренним папкам
     for nm in files:
-        if os.path.getsize(os.path.join(top, nm)) < 1e+6:
+        if os.path.getsize(os.path.join(top, nm)) < 1e+6: # getsize возвращает количество байт
             print(os.path.join(top, nm))
+
+# ниже приведет мой список файлов
             
 # /Users/mrrobot/PycharmProjects/pythonProject1/.DS_Store
 # /Users/mrrobot/PycharmProjects/pythonProject1/1/extra.py
