@@ -1,0 +1,1521 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Наука о данных\n",
+    "\n",
+    "*И. В. Щуров, НИУ ВШЭ*\n",
+    "\n",
+    "На [странице курса](http://math-info.hse.ru/s20/i) находятся дополнительные материалы."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Домашнее задание №4\n",
+    "За разные задачи можно получить разное число баллов. Если не указано обратное, задача весит 1 балл. Максимум за ДЗ можно набрать **30 баллов**. Вы можете решить больше задач, чем требуется, чтобы потренироваться.\n",
+    "\n",
+    "Чтобы сдать ДЗ, его надо загрузить в [nbgr-x](http://python.math-hse.info) в виде `ipynb`-файла. Получить `ipynb`-файл можно, выбрав в Jupyter пункт меню *File → Download as... → IPython Notebook (.ipynb)*."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Активировать тесты\n",
+    "Запустите следующие ячейку, чтобы иметь возможность запускать тесты."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Фабрика тестов для проверки программ, принимающих данные через input()\n",
+    "\n",
+    "from collections import deque\n",
+    "\n",
+    "class Tester(object):\n",
+    "    def __init__(self, inp):\n",
+    "        self.outputs = []\n",
+    "        self.inputs = deque(inp)\n",
+    "    def print(self, *args, sep = \" \", end = \"\\n\"):\n",
+    "        text = sep.join(map(str, args)) + end\n",
+    "        newlines = text.splitlines(keepends=True)\n",
+    "        if self.outputs and self.outputs[-1] and self.outputs[-1][-1] != \"\\n\" and newlines:\n",
+    "            self.outputs[-1] += newlines[0]\n",
+    "            self.outputs.extend(newlines[1:])\n",
+    "        else:\n",
+    "            self.outputs.extend(newlines)\n",
+    "            \n",
+    "    def input(self, *args):\n",
+    "        assert self.inputs, \"Вы пытаетесь считать больше элементов, чем предусмотрено условием\"\n",
+    "        return self.inputs.popleft()\n",
+    "    def __enter__(self):\n",
+    "        global print\n",
+    "        global input\n",
+    "        print = self.print\n",
+    "        input = self.input\n",
+    "        return self.outputs\n",
+    "    def __exit__(self, *args):\n",
+    "        global print\n",
+    "        global input\n",
+    "        del print\n",
+    "        del input"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 1 (1 балл)\n",
+    "Написать функцию `dear(lastname)`, принимающую на вход строку `lastnames`, содержащую некоторые фамилии, разделённые пробелами. Создать и вернуть список, элементами которого являются строки вида `\"Dear <фамилия>!\"`.\n",
+    "\n",
+    "В задаче **требуется** использовать списковые включения (list comprehensions), иначе она не будет засчитана при ручной проверке.\n",
+    "\n",
+    "**Пример.**\n",
+    "\n",
+    "    dear(\"Snow Lannister Stark\") == [\"Dear Snow!\", \"Dear Lannister!\", \"Dear Stark!\"]\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "883581a9dce0c37a960da48164c4e804",
+     "grade": false,
+     "grade_id": "pr1",
+     "locked": false,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def dear(lastnames):\n",
+    "    return [f'Dear {elem}!' for elem in lastnames.split()]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "0a338fac48f186dda40bc7d6458cd724",
+     "grade": true,
+     "grade_id": "pr1t1",
+     "locked": true,
+     "points": 1,
+     "solution": false
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Окей\n"
+     ]
+    }
+   ],
+   "source": [
+    "test_data = [\"Snow Lannister Stark\", \"Bush Clinton Bush Trump\",\n",
+    "            \"Smith Smith\", (\"Potter Weasley Granger \" * 1000).strip()]\n",
+    "\n",
+    "assert dear(\"Snow Lannister Stark\") == [\"Dear Snow!\", \n",
+    "                                        \"Dear Lannister!\", \n",
+    "                                        \"Dear Stark!\"]\n",
+    "assert dear(\"Smith Smith\") == ['Dear Smith!'] * 2\n",
+    "assert dear((\"Potter Weasley Granger \" * 1000).strip()) == [\"Dear Potter!\",\n",
+    "                                                            'Dear Weasley!',\n",
+    "                                                            'Dear Granger!'\n",
+    "                                                           ] * 1000\n",
+    "print('Окей')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 2 (1 балл)\n",
+    "Функция `glue_names(first_names, last_names)` принимает на вход два списка: один с именами, другой с фамилиями. Она должна вернуть список строк, получающихся в результате «склеивания» имён с фамилиями (через пробел). Например, `glue_names(['Bill', 'Hillary', 'Donald', 'Melania'], ['Clinton', 'Clinton', 'Trump', 'Trump'])` должна вернуть список `[\"Bill Clinton\", \"Hillary Clinton\", \"Donald Trump\", \"Melania Trump\"]`. Реализовать такую функцию.\n",
+    "\n",
+    "Здесь **требуется** использовать списковые включения и `zip()`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "ac9fa97f874342b397caf364aa7e577f",
+     "grade": false,
+     "grade_id": "pr2",
+     "locked": false,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def glue_names(first_names, last_names):\n",
+    "    return [first_name + ' ' + last_name for first_name,last_name in zip(first_names, last_names)]\n",
+    "        "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "1391eaeb47e2c86a2e8f617c5cdf7acf",
+     "grade": true,
+     "grade_id": "pr2t1",
+     "locked": true,
+     "points": 1,
+     "solution": false
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Ага!\n"
+     ]
+    }
+   ],
+   "source": [
+    "assert (glue_names(['Bill', 'Hillary', 'Donald', 'Melania'], \n",
+    "                  ['Clinton', 'Clinton', 'Trump', 'Trump']) == \n",
+    "        [\"Bill Clinton\", \"Hillary Clinton\", \"Donald Trump\", \"Melania Trump\"])\n",
+    "assert glue_names(['Haha', 'Hoho'], ['Zzz', 'Yyy']) == ['Haha Zzz', 'Hoho Yyy']\n",
+    "assert glue_names(['A'], ['B']) == ['A B']\n",
+    "print(\"Ага!\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 3 (2 балла)\n",
+    "Написать функцию `swapped_columns(table, i, j)`, принимающую на вход таблицу `table` в виде списка списков, записанную по строчкам (то есть каждым элементом списка `table` является список, задающий строку таблицы) и два индекса `i` и `j`. Функция должна должна вернуть новую таблицу, совпадающую с `table`, но в которой столбцы `i` и `j` поменялись местами. Исходная таблица `table` не должна измениться (в частности, не должно измениться содержимое её строк). Можно использовать функцию `swapped`, написанную в предыдущей домашке. (Кстати, задача решается в одну строчку.)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "ac85d78bc430449fda1e491b5ebf2805",
+     "grade": false,
+     "grade_id": "swapped_columns",
+     "locked": false,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def swapped(array, i, j):\n",
+    "    array[i], array[j] = array[j], array[i]\n",
+    "    return array\n",
+    "\n",
+    "def swapped_columns(table, i, j):\n",
+    "    return [swapped(string.copy(), i, j) for string in table]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "a7903e8f07fafc82b46f4d9decc010c3",
+     "grade": true,
+     "grade_id": "swapped_columns_test",
+     "locked": true,
+     "points": 2,
+     "solution": false
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Ага!\n"
+     ]
+    }
+   ],
+   "source": [
+    "table = [[1, 2, 3], [4, 5, 6]]\n",
+    "backup = table[0]\n",
+    "r = swapped_columns(table, 0, 1)\n",
+    "assert table == [[1, 2, 3], [4, 5, 6]]\n",
+    "assert table[0] is backup\n",
+    "assert r == [[2, 1, 3], [5, 4, 6]]\n",
+    "\n",
+    "table = [[1, 2, 3], [4, 5, 6]]\n",
+    "r = swapped_columns(table, 1, 0)\n",
+    "assert table == [[1, 2, 3], [4, 5, 6]]\n",
+    "assert r == [[2, 1, 3], [5, 4, 6]]\n",
+    "\n",
+    "table = [[1, 2, 3], [4, 5, 6]]\n",
+    "r = swapped_columns(table, 1, 2)\n",
+    "assert table == [[1, 2, 3], [4, 5, 6]]\n",
+    "assert r == [[1, 3, 2], [4, 6, 5]]\n",
+    "\n",
+    "table = [[1, 2, 3], [4, 5, 6]]\n",
+    "r = swapped_columns(table, 2, 1)\n",
+    "assert table == [[1, 2, 3], [4, 5, 6]]\n",
+    "assert r == [[1, 3, 2], [4, 6, 5]]\n",
+    "\n",
+    "table = [['a', 'b', 'cd', 'e']]\n",
+    "r = swapped_columns(table, 2, 1)\n",
+    "assert table == [['a', 'b', 'cd', 'e']]\n",
+    "assert r == [['a', 'cd', 'b', 'e']]\n",
+    "\n",
+    "table = [[1], [2], [3], [4]]\n",
+    "r = swapped_columns(table, 0, 0)\n",
+    "assert table == [[1], [2], [3], [4]]\n",
+    "assert r == [[1], [2], [3], [4]]\n",
+    "print(\"Ага!\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 4 (2 балла)\n",
+    "Написать функцию `swap_columns(table, i, j)`, принимающую на вход таблицу `table` в виде списка списков, записанную по строчкам (то есть каждым элементом списка `table` является список, задающий строку таблицы) и два индекса `i` и `j`. Функция должна поменять в таблице местами столбец `i` и столбец `j` (нумерация столбцов начинается с нуля). Замена должна производиться в самой переданной таблице `table`. Функция не должна ничего возвращать."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "1a2bb9b9114b3acde5025a83cddd13e3",
+     "grade": false,
+     "grade_id": "swap_columns",
+     "locked": false,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def swapped(array, i, j):\n",
+    "    array[i], array[j] = array[j], array[i]\n",
+    "    return array\n",
+    "\n",
+    "def swap_columns(table, i, j):\n",
+    "    table = [swapped(string, i, j) for string in table] "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "eddf9f2cd01a9704b57f6a58780ba7a1",
+     "grade": true,
+     "grade_id": "swap_columns_test",
+     "locked": true,
+     "points": 2,
+     "solution": false
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Ура!\n"
+     ]
+    }
+   ],
+   "source": [
+    "table = [[1, 2, 3], [4, 5, 6]]\n",
+    "r = swap_columns(table, 0, 1)\n",
+    "assert r is None\n",
+    "assert table == [[2, 1, 3], [5, 4, 6]]\n",
+    "\n",
+    "table = [[1, 2, 3], [4, 5, 6]]\n",
+    "r = swap_columns(table, 1, 0)\n",
+    "assert r is None\n",
+    "assert table == [[2, 1, 3], [5, 4, 6]]\n",
+    "\n",
+    "table = [[1, 2, 3], [4, 5, 6]]\n",
+    "r = swap_columns(table, 1, 2)\n",
+    "assert r is None\n",
+    "assert table == [[1, 3, 2], [4, 6, 5]]\n",
+    "\n",
+    "table = [[1, 2, 3], [4, 5, 6]]\n",
+    "r = swap_columns(table, 2, 1)\n",
+    "assert r is None\n",
+    "assert table == [[1, 3, 2], [4, 6, 5]]\n",
+    "\n",
+    "table = [['a', 'b', 'cd', 'e']]\n",
+    "r = swap_columns(table, 2, 1)\n",
+    "assert r is None\n",
+    "assert table == [['a', 'cd', 'b', 'e']]\n",
+    "\n",
+    "table = [[1], [2], [3], [4]]\n",
+    "r = swap_columns(table, 0, 0)\n",
+    "assert r is None\n",
+    "assert table == [[1], [2], [3], [4]]\n",
+    "print(\"Ура!\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 5 (3 балла)\n",
+    "Написать функцию `transpose(table)`, принимающую на вход таблицу в виде списка списков `table` и возвращающую транспонированную таблицу, то есть такую, в которой строчки исходной таблицы записаны по столбцам. Возвращаемая таблица также должна быть записана в виде списка списков — кортежи не допускаются. Например, `transpose([[1, 2, 3], [4, 5, 6], [7, 8, 9])` должна вернуть `[[1,4,7],[2,5,8],[3,6,9]]`, а `transpose([[1,2,3,4]])` возвращает `[[1],[2],[3],[4]]`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "f536df747b8a63af5d7ee3db24f8a9b0",
+     "grade": false,
+     "grade_id": "pr7",
+     "locked": false,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def transpose(table):\n",
+    "    result_table = [[] for i in range(len(table[0]))]\n",
+    "    for i in range(len(table)):\n",
+    "        for j in range(len(table[i])):\n",
+    "            result_table[j].append(table[i][j])\n",
+    "    return result_table"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "67747593bbb71ebf0fad75cab6e6ea1d",
+     "grade": true,
+     "grade_id": "pr7t1",
+     "locked": true,
+     "points": 3,
+     "solution": false
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Хорошо, теперь вы знаете, как транспонировать таблицу!\n"
+     ]
+    }
+   ],
+   "source": [
+    "assert transpose([[1, 2, 3], [4, 5, 6], [7, 8, 9]])==[[1,4,7],[2,5,8],[3,6,9]]\n",
+    "assert transpose([[1, 2, 3, 4]])==[[1], [2], [3], [4]]\n",
+    "assert transpose([[1,2,3,4], [5,6,7,8]])==[[1,5],[2,6], [3,7], [4,8]]\n",
+    "\n",
+    "def check_idemp(t):\n",
+    "    assert transpose(transpose(t))==t\n",
+    "\n",
+    "check_idemp([[1,2],['Hello', 'World']])\n",
+    "check_idemp([[1]*100, [2]*100, [3]*100])\n",
+    "print(\"Хорошо, теперь вы знаете, как транспонировать таблицу!\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 6 (1 балл)\n",
+    "\n",
+    "Написать функцию `first_str(words)`, принимающую на вход список строк и возвращающую ту из них, которая будет идти первой при упорядочивании по алфавиту.\n",
+    "\n",
+    "**Подсказка.** Хотите отсортировать весь список и взять его первый элемент? Это не самое лучшее решение: для сортировки всего списка понадобится много времени, если он большой, а вас интересует лишь самый «маленький» его элемент. Попробуйте исползовать функцию `min()` — посмотрите, можно ли ей скормить строки вместо чисел. Использовать библиотеки нельзя."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "7008c54406b445d698571ea18f076541",
+     "grade": false,
+     "grade_id": "cell-0982af42fe5459db",
+     "locked": false,
+     "schema_version": 1,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def first_str(words):\n",
+    "    return min(words)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "caeab86b7eace30067944fe91b916998",
+     "grade": true,
+     "grade_id": "cell-eba422eaf5f75eb9",
+     "locked": true,
+     "points": 1,
+     "schema_version": 1,
+     "solution": false
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Верно!\n"
+     ]
+    }
+   ],
+   "source": [
+    "from random import shuffle, seed\n",
+    "seed(0)\n",
+    "def shuffle_test(f, inp, outp, n=10):\n",
+    "    for i in range(n):\n",
+    "        shuffle(inp)\n",
+    "        assert f(inp)==outp\n",
+    "def test(inp,outp, n=10):\n",
+    "    return shuffle_test(first_str, inp, outp)\n",
+    "\n",
+    "test(['Hello'], 'Hello')\n",
+    "test(['Hello', 'World'], 'Hello')\n",
+    "test(['hello', 'World'], 'World')\n",
+    "test(['a','b','c','d','e'], 'a', 20)\n",
+    "test(['hello']*100+['World'], 'World')\n",
+    "test(['a', 'aa', 'aaa', 'aaaa'], 'a')\n",
+    "test(['q', 'ww', 'eee', 'zzzzz'], 'eee')\n",
+    "\n",
+    "\n",
+    "del shuffle, seed, shuffle_test, test\n",
+    "print(\"Верно!\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 7 (2 балла)\n",
+    "Написать функцию `sort_by_last_name(names)`, которая на вход принимает список строк с именами и фамилиями (например, `[\"Donald Trump\", \"Hillary Clinton\", \"Gary Johnson\", \"Jill Stein\", \"Darrell Castle\", \"Evan McMullin\"]`), сортирующую его по фамилиям и возвращающую в отсортированном виде. (Можно менять исходный список.) Для указанного выше списка функция должна вернуть список `['Darrell Castle', 'Hillary Clinton', 'Gary Johnson', 'Evan McMullin', 'Jill Stein', 'Donald Trump']`. Порядок записей с одинаковыми фамилиями должен сохраняться. Например, для списка `[\"Alice Smith\", \"John Doe\", \"Jack Doe\"]` должно быть возвращено `[\"John Doe\", \"Jack Doe\", \"Alice Smith\"]`.\n",
+    "\n",
+    "**Подсказка.** Вам нужно будет написать функцию, получающую на вход элемент списка `names` (то есть одну строку с именем и фамилией) и возвращающую фамилию. Затем эту функцию необходимо передать функции `sorted` в качестве параметра `key`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "2f07eca49aad3722966b46ce5a0d7e8d",
+     "grade_id": "pr4",
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def sort_by_last_name(names):\n",
+    "    return sorted(names, key=lambda elem: elem.split()[1])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "e9d98d5249e7de4a99740bc0c6ea1218",
+     "grade": true,
+     "grade_id": "pr4t1",
+     "locked": true,
+     "points": 2,
+     "solution": false
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Не так уж это было и страшно, да?\n"
+     ]
+    }
+   ],
+   "source": [
+    "from random import shuffle, seed\n",
+    "seed(0)\n",
+    "def shuffle_test(f, inp, outp, n=10):\n",
+    "    for i in range(n):\n",
+    "        shuffle(inp)\n",
+    "        assert f(inp)==outp\n",
+    "def test(inp,outp, n=10):\n",
+    "    return shuffle_test(sort_by_last_name, inp, outp)\n",
+    "\n",
+    "test([\"Donald Trump\", \"Hillary Clinton\", \"Gary Johnson\", \"Jill Stein\", \"Darrell Castle\", \"Evan McMullin\"],\n",
+    "     ['Darrell Castle', 'Hillary Clinton', 'Gary Johnson', 'Evan McMullin', 'Jill Stein', 'Donald Trump'])\n",
+    "assert sort_by_last_name([\"Aaa Aaa\", \"Aaa Bbb\", \"Bbb Aaa\"]) == [\"Aaa Aaa\", \"Bbb Aaa\", \"Aaa Bbb\"]\n",
+    "assert sort_by_last_name([\"Aaa Bbb\", \"Bbb Aaa\", \"Aaa Aaa\"]) == [\"Bbb Aaa\", \"Aaa Aaa\", \"Aaa Bbb\"]\n",
+    "assert sort_by_last_name([\"Alice Smith\", \"John Doe\", \"Jack Doe\"]) == [\"John Doe\", \"Jack Doe\", \"Alice Smith\"]\n",
+    "\n",
+    "del shuffle, seed, shuffle_test, test\n",
+    "print(\"Не так уж это было и страшно, да?\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 8 (2 балла)\n",
+    "Написать функцию `sort_by_last_first_name(names)`, которая на вход принимает список строк с именами и фамилиями, сортирующую его по фамилии, а при совпадении фамилий — по именам, и возвращающую в отсортированном виде. Например, для списка `[\"Alice Smith\", \"John Doe\", \"Jack Doe\"]` должно быть возвращено `[\"Jack Doe\", \"John Doe\", \"Alice Smith\"]`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "4a030358ed221e787d33caed784cc044",
+     "grade_id": "pr5",
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def sort_by_last_first_name(names):\n",
+    "    return sorted(names, key=lambda elem: list(elem.split())[::-1])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "f6bba6304f170b84b2547b31d19a6189",
+     "grade": true,
+     "grade_id": "pr5t1",
+     "locked": true,
+     "points": 2,
+     "solution": false
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Хорошо!\n"
+     ]
+    }
+   ],
+   "source": [
+    "from random import shuffle, seed\n",
+    "seed(0)\n",
+    "def shuffle_test(f, inp, outp, n=10):\n",
+    "    for i in range(n):\n",
+    "        shuffle(inp)\n",
+    "        assert f(inp)==outp\n",
+    "def test(inp,outp, n=10):\n",
+    "    return shuffle_test(sort_by_last_first_name, inp, outp)\n",
+    "\n",
+    "test([\"Donald Trump\", \"Hillary Clinton\", \"Gary Johnson\", \"Jill Stein\", \"Darrell Castle\", \"Evan McMullin\"],\n",
+    "     ['Darrell Castle', 'Hillary Clinton', 'Gary Johnson', 'Evan McMullin', 'Jill Stein', 'Donald Trump'])\n",
+    "test([\"Donald Trump\", \"Melania Trump\", \"Hillary Clinton\", \"Bill Clinton\", \n",
+    "      \"Gary Johnson\", \"Jill Stein\", \"Darrell Castle\", \"Evan McMullin\"],\n",
+    "     ['Darrell Castle', \"Bill Clinton\", 'Hillary Clinton', 'Gary Johnson', 'Evan McMullin', \n",
+    "      'Jill Stein', 'Donald Trump', \"Melania Trump\"])\n",
+    "test([\"Aaa Aaa\", \"Aaa Bbb\", \"Bbb Aaa\"],  [\"Aaa Aaa\", \"Bbb Aaa\", \"Aaa Bbb\"])\n",
+    "test([\"Alice Smith\", \"John Doe\", \"Jack Doe\"], [\"Jack Doe\", \"John Doe\", \"Alice Smith\"])\n",
+    "\n",
+    "del shuffle, seed, shuffle_test, test\n",
+    "print(\"Хорошо!\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 9 (1 балл)\n",
+    "\n",
+    "Написать функцию `get_first_student_grade(students)`, принимающую на вход список `students`, каждый элемент которого является кортежем: первый элемент кортежа является именем студента, а второй его оценкой. Например: `students = [('Bob', 3), ('Alice', 4)]`. Функция должна вернуть оценку студента, имя которого является первым при алфавитной сортировке. (В нашем случае должна вернуть число `4`.) Все студенты имеют разные имена.\n",
+    "\n",
+    "**Подсказка.** См. подсказку к задаче 5. Возможно, функции `min()` удастся скормить кортежи? Попробуйте! Кстати, задача решается ровно в одну строчку (не считая `def`). Использовать библиотеки нельзя."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "e6f11da4f34969734682069338fc5fa0",
+     "grade": false,
+     "grade_id": "cell-d46cc6e3bec4654c",
+     "locked": false,
+     "schema_version": 1,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def get_first_student_grade(students):\n",
+    "    return min(students, key=lambda elem: elem[0])[1]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "e2ff79f7c96a6a97aa00cd39856f8090",
+     "grade": true,
+     "grade_id": "cell-4369f8cd93807784",
+     "locked": true,
+     "points": 1,
+     "schema_version": 1,
+     "solution": false
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Хорошо, поехали дальше!\n"
+     ]
+    }
+   ],
+   "source": [
+    "from random import shuffle, seed\n",
+    "seed(0)\n",
+    "def shuffle_test(f, inp, outp, n=10):\n",
+    "    for i in range(n):\n",
+    "        shuffle(inp)\n",
+    "        assert f(inp)==outp\n",
+    "def test(inp,outp, n=10):\n",
+    "    return shuffle_test(get_first_student_grade, inp, outp)\n",
+    "test([('Bob', 3), ('Alice', 4)], 4)\n",
+    "test([('Zzz', 1)], 1)\n",
+    "test([('Haha', 2), ('Hoho', 3), ('Zzz', 4), ('aaaa', 5)], 2)\n",
+    "\n",
+    "del shuffle, seed, shuffle_test, test\n",
+    "print(\"Хорошо, поехали дальше!\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 10 (2 балла)\n",
+    "\n",
+    "Написать функцию `get_name_of_best_student(students)`, принимающую на вход список `students`, каждый элемент которого является кортежем: первый элемент кортежа является именем студента, а второй его оценкой. Например: `students = [('Bob', 3), ('Alice', 4)]`. Функция должна вернуть имя студента с наибольшей оценкой. Если таких студентов несколько, она должна вернуть имя того из них, кто первый встречается в списке `students` (в том порядке, в котором этот список передан). Например, для списка `[('Bob', 4), ('Alice', 4)]` необходимо вернуть `'Bob'`, а для списка `[('Alice', 4), ('Bob', 4)]` вернуть `'Alice'`.\n",
+    "\n",
+    "**Подсказка.** У функций `min()` и `max()` есть необязательный параметр `key`, работающий так же, как и у функции `sort()`. К чему бы это? Кстати, задачу можно (и нужно) решить без циклов и условных операторов."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "f83c1cdeb8b203d18c8f251fab38a860",
+     "grade_id": "pr3",
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def get_name_of_best_student(students):\n",
+    "    return max(students, key=lambda elem: elem[1])[0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "c395682282c9ba1eac9819e27227402e",
+     "grade": true,
+     "grade_id": "pr3t1",
+     "locked": true,
+     "points": 2,
+     "solution": false
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Отлично!\n"
+     ]
+    }
+   ],
+   "source": [
+    "assert get_name_of_best_student([('Bob', 4), ('Alice', 4)]) == 'Bob'\n",
+    "assert get_name_of_best_student([('Alice', 4), ('Bob', 4)]) == 'Alice'\n",
+    "assert get_name_of_best_student([('Zzz', 3), ('Bob', 4), ('Alice', 4)]) == 'Bob'\n",
+    "assert get_name_of_best_student([('Alice', 4), ('Zzz', 3), ('Bob', 4)]) == 'Alice'\n",
+    "assert get_name_of_best_student([('Zzz', 5), ('Bob', 4), ('Alice', 4)]) == 'Zzz'\n",
+    "assert get_name_of_best_student([('Alice', 4), ('Zzz', 5), ('Bob', 4)]) == 'Zzz'\n",
+    "assert get_name_of_best_student([('Alice', 4), ('Zzz', 5), ('Bob', 4), ('Zzz', 5)]) == 'Zzz'\n",
+    "assert get_name_of_best_student([('Alice', 4), ('Zzz', 5), ('Bob', 4), ('Zzz', 3)]) == 'Zzz'\n",
+    "assert get_name_of_best_student([('Alice', 0)]) == 'Alice'\n",
+    "print(\"Отлично!\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 11 (4 балла)\n",
+    "\n",
+    "Написать функцию `sort_gradebook(gradebook)`, принимающую на вход некую ведомость в виде списка, элементами которого являются списки такого вида: `[first_name, last_name, grade_1, grade_2, ..., grade_n, final_grade]`, где `first_name` — имя студента, `last_name` — его фамилия, `grade_1, ..., grade_n` — оценки студента по контрольным от 1 до n (число n — общее число контрольных, оно одинаковое для конкретного gradebook, но заранее не известно), `final_grade` — итоговая оценка. Функция должна отсортировать `gradebook` следующим образом (и вернуть его отсортированным):\n",
+    "\n",
+    "- По итоговой оценке;\n",
+    "- При совпадении итоговой оценки — по оценке за первую контрольную;\n",
+    "- При совпадении всего предыдущего — по оценке за вторую контрольную;\n",
+    "- При совпадении всего предыдущего — по оценке за третью контрольную (и т.д. пока контрольные не закончатся);\n",
+    "- При совпадении всех оценок — по фамилии;\n",
+    "- При совпадении всех оценок и фамилии — по имени.\n",
+    "\n",
+    "Сортировки по оценкам производятся по убыванию, по фамилии по возрастанию, по имени — по убыванию.\n",
+    "\n",
+    "Примеры см. в тестах.\n",
+    "\n",
+    "**Подсказка.** Если при сортировке списка с ключом получаются одинаковые ключи, то порядок следования элементов сохраняется. Ключом может быть не только число или строка, но и список."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "fd1abfcedd2afdd872d831e17c6cc43d",
+     "grade_id": "pr6",
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def sort_gradebook(gradebook):\n",
+    "    return sorted(gradebook, key=lambda elem: [elem[-1]] + elem[2:len(elem)-1] + [-1*elem for elem in map(ord, elem[1])] + [elem[0]], reverse=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "8ae754fcadf1451672584392d68e6fa4",
+     "grade": true,
+     "grade_id": "pr6t1",
+     "locked": true,
+     "points": 4,
+     "solution": false
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Это была непростая задача!\n"
+     ]
+    }
+   ],
+   "source": [
+    "from itertools import permutations\n",
+    "def test_sort(inp, outp):\n",
+    "    for i in permutations(inp):\n",
+    "        assert sort_gradebook(list(i)) == outp, i\n",
+    "\n",
+    "test_sort([\n",
+    "        ['Alice', 'Smith', 2, 3, 4],\n",
+    "        ['John', 'Smith', 2, 3, 5]\n",
+    "    ], [\n",
+    "        ['John', 'Smith', 2, 3, 5],\n",
+    "        ['Alice', 'Smith', 2, 3, 4]\n",
+    "])\n",
+    "\n",
+    "test_sort([\n",
+    "        ['Alice', 'Smith', 2, 3, 4],\n",
+    "        ['John', 'Smith', 2, 3, 4]\n",
+    "    ], [\n",
+    "    ['John', 'Smith', 2, 3, 4],\n",
+    "    ['Alice', 'Smith', 2, 3, 4],    \n",
+    "])\n",
+    "\n",
+    "test_sort([\n",
+    "        ['Alice', 'Smith', 1, 3, 4],\n",
+    "        ['John', 'Smith', 2, 3, 4]\n",
+    "        ], [\n",
+    "        ['John', 'Smith', 2, 3, 4],\n",
+    "        ['Alice', 'Smith', 1, 3, 4]\n",
+    "])\n",
+    "\n",
+    "test_sort([\n",
+    "            ['Alice', 'Smith', 1, 1, 1, 3, 4],\n",
+    "            ['John', 'Smith', 1, 1, 2, 3, 4]],\n",
+    "                         [\n",
+    "            ['John', 'Smith', 1, 1, 2, 3, 4],\n",
+    "            ['Alice', 'Smith', 1, 1, 1, 3, 4]\n",
+    "])\n",
+    "\n",
+    "test_sort([\n",
+    "            ['Alice', 'Doe', 1, 1, 3, 3, 4],\n",
+    "            ['Alice', 'Smith', 1, 1, 3, 3, 4],\n",
+    "            ['John', 'Smith', 1, 1, 2, 3, 4]], \n",
+    "          [\n",
+    "            ['Alice', 'Doe', 1, 1, 3, 3, 4],\n",
+    "            ['Alice', 'Smith', 1, 1, 3, 3, 4],\n",
+    "            ['John', 'Smith', 1, 1, 2, 3, 4]\n",
+    "])\n",
+    "\n",
+    "test_sort([\n",
+    "        ['Alice', 'Doe', 1, 1, 3, 3, 4],\n",
+    "        ['Alice', 'Smith', 1, 1, 3, 3, 4],\n",
+    "        ['John', 'Smith', 2, 1, 2, 3, 4]], \n",
+    "          [\n",
+    "        ['John', 'Smith', 2, 1, 2, 3, 4],\n",
+    "        ['Alice', 'Doe', 1, 1, 3, 3, 4],\n",
+    "        ['Alice', 'Smith', 1, 1, 3, 3, 4],\n",
+    "])\n",
+    "\n",
+    "del test_sort\n",
+    "print(\"Это была непростая задача!\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 12 (2 балла)\n",
+    "Функция `get_most_ooo_word(words)` принимает на вход строчку, содержащую слова, разделенные пробелами или символами перевода строки (одним или несколькими) и возвращает список из тех слов, в которых число букв `o` максимально. Например, `get_most_ooo_word(['aa ao   oa aaaooo   aooqq aoooq'])` должна вернуть `['aaaooo', 'aoooq']`. Порядок слов в возвращаемом списке должен соответствовать порядку слов в исходной строке. Написать такую функцию.\n",
+    "\n",
+    "**Подсказка.** Посчитать, сколько раз подстрока встречается в строке, можно с помощью метода `count()`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "8132f1602f5c1b0795b336115c443a08",
+     "grade_id": "pr14",
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def get_most_ooo_word(words):\n",
+    "    result = sorted([(word.strip(), word.count('o')) for word in words.replace('\\n', ' ').split()], key=lambda elem: elem[1], reverse=True)\n",
+    "    return [word[0] for word in result if word[1] == result[0][1]]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "c3894b5f92c2b113fbba21128b57075b",
+     "grade": true,
+     "grade_id": "pr14t1",
+     "locked": true,
+     "points": 2,
+     "solution": false
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "ОК!\n"
+     ]
+    }
+   ],
+   "source": [
+    "assert get_most_ooo_word(\" \".join(['aa', 'ao', 'oa', 'aaaooo', 'aooqq', 'aoooq'])) == ['aaaooo', 'aoooq']\n",
+    "assert get_most_ooo_word(\" \\n  \".join(['aa', 'bb', 'ccc'])) == ['aa', 'bb', 'ccc']\n",
+    "assert get_most_ooo_word(\"   \\n\".join(['aa', 'bb', 'ccc', 'o'])) == ['o']\n",
+    "assert get_most_ooo_word(\" \".join(['o', 'oo', 'o', 'ooo', 'o', 'ooo', 'o', 'aooo'])) == ['ooo', 'ooo', 'aooo']\n",
+    "loremipsum = \"\"\"\n",
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor \n",
+    "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis \n",
+    "nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n",
+    "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore \n",
+    "eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, \n",
+    "sunt in culpa qui officia deserunt mollit anim id est laborum\n",
+    "\"\"\"\n",
+    "assert get_most_ooo_word(loremipsum) == ['commodo']\n",
+    "print(\"ОК!\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 13 (1 балл)\n",
+    "\n",
+    "Напишите функцию `sort_dict_keys(d)`, принимающую на вход словарь и печатающую его построчно в порядке возрастания его ключей.\n",
+    "\n",
+    "__Примеры__\n",
+    "\n",
+    "__Вызов функции:__\n",
+    "\n",
+    "    sort_dict_keys({'a': 1, 'z':1.5, 'c':2})\n",
+    "    \n",
+    "__Выходные данные:__\n",
+    "\n",
+    "    a 1\n",
+    "    c 2\n",
+    "    z 1.5"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "1436324d245d5601bc02fe17b90c7ec6",
+     "grade": false,
+     "grade_id": "cell-8853ffed149f76c5",
+     "locked": false,
+     "schema_version": 1,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def sort_dict_keys(d):\n",
+    "    keys = sorted(d.keys())\n",
+    "    for key in keys:\n",
+    "        print(key, d[key])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "8b27c1a0ff19001ff852beafadc6dc42",
+     "grade": true,
+     "grade_id": "cell-6eaa0e12403e2eab",
+     "locked": true,
+     "points": 1,
+     "schema_version": 1,
+     "solution": false
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Ура, всё верно!\n"
+     ]
+    }
+   ],
+   "source": [
+    "test_data = [\n",
+    "    ({'a': 1, 'z':1.5, 'c':2}, ['a 1\\n', 'c 2\\n', 'z 1.5\\n']),\n",
+    "    ({'Alice':4, 'Bob':9, \"Dan\":3}, ['Alice 4\\n', 'Bob 9\\n', 'Dan 3\\n']),\n",
+    "    (dict([(str(x), 10-x) for x in range(10)]), [str(x) + ' ' + str(10-x) + '\\n' for x in range(10)]),\n",
+    "    (dict([(str(x), 10-x) for x in range(10)] + [('1.5', 100500)]), ['0 10\\n', '1 9\\n', '1.5 100500\\n'] + [str(x) + ' ' + str(10-x) + '\\n' for x in range(2, 10)])]\n",
+    "for inp, answer in test_data:\n",
+    "    with Tester([inp]) as t_out:\n",
+    "        sort_dict_keys(inp)\n",
+    "        assert t_out == answer, \"Что-то пошло не так\"\n",
+    "print(\"Ура, всё верно!\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 14 (2 балла)\n",
+    "Написать функцию `sum_ints_in_file(filename)`, принимающую на вход имя файла, содержащего целые числа (каждое число на новой строке, некоторые строки могут быть пустыми). Функция должна вернуть сумму этих чисел.\n",
+    "\n",
+    "Не забудьте закрыть файл!"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "8d4bc1f6363a24b9fc96da8f740e09ec",
+     "grade_id": "pr4x",
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def sum_ints_in_file(filename):\n",
+    "    result = 0\n",
+    "    with open(filename, 'r') as f:  \n",
+    "        for line in f:\n",
+    "            try:\n",
+    "                result += int(line)\n",
+    "            except:\n",
+    "                pass\n",
+    "    return result"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "59b3d9839924731d833994f02b3ce2a7",
+     "grade": true,
+     "grade_id": "pr4t1z",
+     "locked": true,
+     "points": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "try:\n",
+    "    del open\n",
+    "except:\n",
+    "    pass\n",
+    "from tempfile import NamedTemporaryFile\n",
+    "import os\n",
+    "\n",
+    "testsuite = [([1, 2, 3]),\n",
+    "             ([5]),\n",
+    "             ([111, 23, 123]),\n",
+    "             ([0]),\n",
+    "             ([-1, -10, -123]),\n",
+    "             (0, -1, 1, 100, 500, 9999)]\n",
+    "\n",
+    "for testlist in testsuite:\n",
+    "    try:\n",
+    "        f = NamedTemporaryFile(dir='.', delete=False, mode='w')\n",
+    "        name = f.name\n",
+    "        f.file.write(\"\\n\".join(map(str, testlist)))\n",
+    "        f.file.close()\n",
+    "        assert sum_ints_in_file(name) == sum(testlist)\n",
+    "    finally:\n",
+    "        os.remove(name)\n",
+    "\n",
+    "import io\n",
+    "\n",
+    "test_txt = io.StringIO(\"1\\n2\\n\")\n",
+    "\n",
+    "def get_test_txt():\n",
+    "    return test_txt\n",
+    "\n",
+    "def open(file, mode = 'r', *args, **kwargs):\n",
+    "    return get_test_txt()\n",
+    "\n",
+    "try:\n",
+    "    s = sum_ints_in_file(\"test.txt\")\n",
+    "    assert test_txt.closed, \"Вы забыли закрыть файл\"\n",
+    "    assert s == 3\n",
+    "finally:\n",
+    "    del open"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "9a3a079de56cc95f5ee88cacc7c876f5",
+     "grade": true,
+     "grade_id": "pr4t2",
+     "locked": true,
+     "points": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "try:\n",
+    "    f = NamedTemporaryFile(dir='.', delete=False, mode='w')\n",
+    "    name = f.name\n",
+    "    f.file.write(\"1\\n2\\n\\n\")\n",
+    "    f.file.close()\n",
+    "    assert sum_ints_in_file(name) == 3\n",
+    "except:\n",
+    "    print(\"Ошибка! Обратите внимание: файл может содержать пустые строки.\")\n",
+    "    raise\n",
+    "finally:\n",
+    "    os.remove(name)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 15 (2 балла)\n",
+    "Написать функцию `censore_haha(filename)`, считывающую файл с именем, лежащем в переменной `filename` и записывающим его в новый файл, имя которого получается добавлением к концу имени исходного файла `.censored.txt`. При записи в новый файл все вхождения слова `haha` должны быть заменены на `[censored]`.\n",
+    "\n",
+    "Например, если функция была вызвана как `censore_haha('test.txt')`, она должна создать файл `test.txt.censored.txt` и записать в него отцензурированную версию исходного файла."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "762dec0bc584bcf85bb060904f8ada20",
+     "grade_id": "pr2t1xz",
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def censore_haha(filename):\n",
+    "    text = ''\n",
+    "    with open(filename, 'r') as f: \n",
+    "        text = f.read()\n",
+    "    text = text.replace('haha', '[censored]')\n",
+    "    with open(filename+'.censored.txt', 'w') as f: \n",
+    "        f.write(text)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "5f5c29121121f7070351c8fa2eea0fee",
+     "grade": true,
+     "grade_id": "pr2t1xtz",
+     "locked": true,
+     "points": 2,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from tempfile import NamedTemporaryFile\n",
+    "import os\n",
+    "\n",
+    "def test_censore(inp, outp):\n",
+    "    try:\n",
+    "        f = NamedTemporaryFile(dir='.', delete=False, mode='w')\n",
+    "        name = f.name\n",
+    "        f.file.write(inp)\n",
+    "        f.file.close()\n",
+    "\n",
+    "        censore_haha(f.name)\n",
+    "        with open(f.name + \".censored.txt\") as f:\n",
+    "            content = f.read()\n",
+    "        assert content == outp, (\"input file: {inp}, \"\n",
+    "                                 \"expected output: {outp} \"\n",
+    "                                 \"obtained output: {content}\".format(\n",
+    "                                 inp=inp, outp=outp, content=content\n",
+    "                                 ))\n",
+    "    finally:\n",
+    "        os.remove(name)\n",
+    "\n",
+    "test_censore(\n",
+    "    \"haha test\\nanother haha haha test\\nhahahaha hahahaha\\n\"\n",
+    "    \"this is a test\\nwell\",\n",
+    "    (\"[censored] test\\nanother [censored] [censored] test\\n\"\n",
+    "    \"[censored][censored] [censored][censored]\\nthis is a test\\nwell\")\n",
+    ")\n",
+    "\n",
+    "test_censore(\n",
+    "    (\n",
+    "        \"this is a haha haha haha\\n\"\n",
+    "        \"haha ha ha hahahahahaha ha haha\\n\"\n",
+    "        \"\\n\"\n",
+    "        \"ha\\n\"\n",
+    "        \"ha\\n\"\n",
+    "        \"\\n\"\n",
+    "        \"thisisahahahathis\\n\"\n",
+    "        \"well...\\n\"\n",
+    "        \"\\n\"\n",
+    "        \"Hello, world!\\n\"\n",
+    "    ),\n",
+    "    (\n",
+    "        \"this is a [censored] [censored] [censored]\\n\"\n",
+    "        \"[censored] ha ha [censored][censored][censored] ha [censored]\\n\"\n",
+    "        \"\\n\"\n",
+    "        \"ha\\n\"\n",
+    "        \"ha\\n\"\n",
+    "        \"\\n\"\n",
+    "        \"thisisa[censored]hathis\\n\"\n",
+    "        \"well...\\n\"\n",
+    "        \"\\n\"\n",
+    "        \"Hello, world!\\n\"\n",
+    "    )\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 16 (2 балла)\n",
+    "Написать функцию `three_best_applicants(portfolio)`, принимающую на вход имя файла с портфолио в формате, аналогичном [этому файлу](http://math-info.hse.ru/f/2017-18/dj-prog/portfolio.txt), и возвращающую список фамилий и имён трёх лучших абитуриентов, упорядоченных по числу набранных ими баллов (по убыванию). Каждый элемент возвращаемого списка должен был кортежем, в котором на первом месте стоит фамилия студента, а на втором — его имя. В файле идет сначала имя, потом фамилия, а потом число баллов, причём между именем и фамилией стоит пробел, а между фамилием и числом баллов — символ табуляции (`\\t`)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "7ca269b1a03d9f8fa3bd3aee2dab203a",
+     "grade_id": "pr3xz",
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def three_best_applicants(portfolio):\n",
+    "    students = []\n",
+    "    with open(portfolio, 'r') as f: \n",
+    "        for line in f:\n",
+    "            FIO, points = line.split('\\t')\n",
+    "            first_name, last_name = FIO.split(' ')\n",
+    "            points = int(points)\n",
+    "            students.append((first_name, last_name, points,))\n",
+    "    return [(elem[1], elem[0],) for elem in sorted(students, key=lambda elem: elem[2], reverse=True)[:3]]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "19c9a5f1e073b7f4a7dc2d181010c65b",
+     "grade": true,
+     "grade_id": "pr3xtz",
+     "locked": true,
+     "points": 2,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from tempfile import NamedTemporaryFile\n",
+    "import os\n",
+    "\n",
+    "def test_portfolio(inp, outp):\n",
+    "    try:\n",
+    "        f = NamedTemporaryFile(dir='.', delete=False, mode='w')\n",
+    "        name = f.name\n",
+    "        f.file.write(inp)\n",
+    "        f.file.close()\n",
+    "\n",
+    "        obtained = three_best_applicants(f.name)\n",
+    "        assert obtained == outp, (\"input file: {inp}, \"\n",
+    "                                 \"expected output: {outp} \"\n",
+    "                                 \"obtained output: {obtained}\").format(\n",
+    "            inp=inp, outp=outp, obtained=obtained)\n",
+    "    finally:\n",
+    "        os.remove(name)\n",
+    "\n",
+    "test_portfolio(\n",
+    "\"\"\"Ann Brown\\t25\n",
+    "Emily Calvert\\t89\n",
+    "Alice Charr\\t78\n",
+    "Bill Taylor\\t94\n",
+    "Polly Smith\\t32\n",
+    "Jill Acker\\t68\n",
+    "Tom Bass\\t15\n",
+    "Victoria Greg\\t48\n",
+    "Philipp Pruitt\\t65\n",
+    "Cristine Evans\\t82\n",
+    "\"\"\",[('Taylor', 'Bill'), ('Calvert', 'Emily'), ('Evans', 'Cristine')])\n",
+    "\n",
+    "test_portfolio(\n",
+    "\"\"\"Ann Brown\\t125\n",
+    "Emily Calvert\\t89\n",
+    "Alice Charr\\t78\n",
+    "Bill Taylor\\t94\n",
+    "Polly Smith\\t932\n",
+    "Victoria Greg\\t648\n",
+    "Philipp Pruitt\\t65\n",
+    "Cristine Evans\\t82\n",
+    "\"\"\",[('Smith', 'Polly'), ('Greg', 'Victoria'), ('Brown', 'Ann')])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 17 (4 балла)\n",
+    "Функция `save_bill(clientname, cart, filename)` принимает на вход имя клиента, список покупок cart, состоящий из трехэлементных кортежей вида `(название товара, количество, цена за единицу)`, и имя файла `filename`. Функция должна создать файл, имя которого указано в переменной `filename` с чеком по заданному образцу и ничего не возвращать. Все числа должны выводиться в файл с двумя значащами цифрами после десятичной точки.  Например, `save_bill('Alice', [('Oil', 2, 100.11), ('Bread', 0.345, 90), ('Milk', 1, 50.32)], \"somefile.txt\")` должна создать файл `somefile.txt` со следующим содержимым:\n",
+    "\n",
+    "    Client name: Alice\n",
+    "\n",
+    "    Oil x 2.00: 200.22\n",
+    "    Bread x 0.34: 31.05\n",
+    "    Milk x 1.00: 50.32\n",
+    "\n",
+    "    Total: 281.59\n",
+    "\n",
+    "**Подсказка.** Записать число с двумя знаками после десятичной точки можно так:\n",
+    "\n",
+    "    \"{:.2f}\".format(12.345)\n",
+    "    \n",
+    "А ещё подставить значение переменной в строку можно так:\n",
+    "\n",
+    "    x = 12.345\n",
+    "    f\"{x:.2f}"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "a7eb80883a1ef9152282f2dc3428ffc7",
+     "grade_id": "pr5xz",
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def save_bill(clientname, cart, filename):\n",
+    "    total = 0\n",
+    "    with open(filename, 'w') as f:\n",
+    "        print(f'Client name: {clientname}',end='\\n\\n',file=f)\n",
+    "        for product in cart:\n",
+    "            print('{} x {:.2f}: {:.2f}'.format(product[0], product[1], product[1] * product[2]),file=f)\n",
+    "            total += product[1] * product[2]\n",
+    "        print(file=f)\n",
+    "        print('Total: {:.2f}'.format(total),file=f)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "2cf33a29a8a67a96880ee5d481ea2dd0",
+     "grade": true,
+     "grade_id": "pr5t1xz",
+     "locked": true,
+     "points": 4,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from tempfile import NamedTemporaryFile\n",
+    "import os\n",
+    "\n",
+    "testsuite = [(\"Alice\", [('Oil', 2, 100.11), ('Bread', 0.345, 90),\n",
+    "                        ('Milk', 1, 50.32)],\n",
+    "                        ('Client name: Alice\\n\\nOil x 2.00: 200.22\\nBread'\n",
+    "                        ' x 0.34: 31.05\\nMilk x 1.00: 50.32\\n\\nTotal: 281'\n",
+    "                        '.59')),\n",
+    "             (\"Bill Clinton\", [('Thing', 1, 10),\n",
+    "                               ('Other thing', 1.234, 32.32)],\n",
+    "              ('Client name: Bill Clinton\\n\\nThing x 1.00: 10.0'\n",
+    "               '0\\nOther thing x 1.23: 39.88\\n\\nTotal: 49.88')),\n",
+    "             (\"Claudia\", [('This', 1.3, 2.12),\n",
+    "                          ('This', 1.6, 2.12)],\n",
+    "             ('Client name: Claudia\\n\\nThis x 1.30: 2.76\\nThis'\n",
+    "              ' x 1.60: 3.39\\n\\nTotal: 6.15'))\n",
+    "            ]\n",
+    "\n",
+    "for clientname, cart, output in testsuite:\n",
+    "    f = NamedTemporaryFile(dir='.', delete=False)\n",
+    "    name = f.name\n",
+    "    f.close()\n",
+    "    try:\n",
+    "        save_bill(clientname, cart, name)\n",
+    "        with open(name) as f:\n",
+    "            collected_output = f.read().strip()\n",
+    "            assert collected_output == output.strip(), (collected_output, output.strip())\n",
+    "    finally:\n",
+    "        os.remove(name)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  },
+  "toc": {
+   "toc_cell": false,
+   "toc_number_sections": false,
+   "toc_threshold": 6,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
