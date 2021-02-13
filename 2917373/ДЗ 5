@@ -1,0 +1,1472 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Наука о данных\n",
+    "\n",
+    "*И. В. Щуров, НИУ ВШЭ*\n",
+    "\n",
+    "На [странице курса](http://math-info.hse.ru/s19/h) находятся дополнительные материалы."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Домашнее задание №5\n",
+    "За разные задачи можно получить разное число баллов. Если не указано обратное, задача весит 1 балл. Максимум за ДЗ можно набрать **36 баллов**. Вы можете решить больше задач, чем требуется, чтобы потренироваться.\n",
+    "\n",
+    "Чтобы сдать ДЗ, его надо загрузить в [nbgr-x](http://python.math-hse.info) в виде `ipynb`-файла. Получить `ipynb`-файл можно, выбрав в Jupyter пункт меню *File → Download as... → IPython Notebook (.ipynb)*."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Часть 1: классы"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 1 (сразу на 17 баллов)\n",
+    "Напишите класс `Amoeba`, описывающий амёб. Каждая амёба имеет имя (атрибут `name`), цвет (атрибут `color`) и возраст (атрибут `age`). Имя и цвет задаются строками, возраст — целым числом (количество дней, прошедших с момента рождения амёбы; в момент рождения инициализируется нулём). Когда амёбе исполняется 3 дня, она становится совершеннолетней и может производить потомство. Размножение у амёб бесполое. Каждая амёба хранит список своих детей (`children`). При рождении амёбы этот список пустой, с рождением каждого ребёнка он вписывается в этот список (в порядке рождения: то есть каждый новый ребёнок записывается в конец списка). При создании амёбы человеком её цвет указывается явно в момент создания. Если амёба рождаёт ребёнка, его цвет совпадает с цветом амёбы-родителя. Амёба, рождённая другой амёбой, знает, кто её родитель (она хранит эту информацию в атрибуте `parent`). Если амёбу создал человек, то атрибут `parent` инициализируется `None`.\n",
+    "\n",
+    "Итак, класс `Amoeba` должен обладать следующими атрибутами:\n",
+    "\n",
+    "- `name`: строка\n",
+    "- `color`: строка\n",
+    "- `age`: целое число\n",
+    "- `parent`: экземпляр класса `Amoeba`\n",
+    "- `children`: список экземпляров класса `Amoeba` (быть может, пустой)\n",
+    "\n",
+    "Необходимо реализовать следующие методы:\n",
+    "\n",
+    "- `__init__()`: конструктор, принимает на вход `name`, `color` и `parent`, если `parent` не установлен, его следует считать равным `None`. (**1 балл.**)\n",
+    "- `__repr__()`: строковое представление, имеющее вид `\"Amoeba(name='{name}', color='{color}')\"`, где `{name}` и `{color}` — её имя и цвет. Например, `Amoeba(name='Laama', color='green')` (**1 балл.**)\n",
+    "- `__str__()`: человекочитаемое строковое представление, имеющее вид `<{color} amoeba named {name}>`. (Например, `<green amoeba named Laama>`.) (**1 балл.**)\n",
+    "- `grow()`: увеличить возраст на 1. (**1 балл.**)\n",
+    "- `is_adult()`: проверить, является ли амёба взрослой; если да, вернуть `True`, иначе вернуть `False`. (**1 балл.**)\n",
+    "- `give_birth()`: принимает на вход аргумент `name`. Если амёба является взрослой, она должна родить ребёнка, то есть создать новую амёбу, имя которой равно `name` и цвет которой совпадает со своим цветом, записать этого ребёнка в список своих детей (в конец списка), записать себя как родителя этого ребёнка и вернуть этого ребёнка. Если амёба не является взрослой, этот метод ничего не делает и возвращает `None`. (**2 балла.**)\n",
+    "- `get_brothers()`: возвращает список всех амёб, являющихся братьями данной. Амёба не считается братом самой себе. Если у амёбы нет родителя, возвращает `None`. (**2 балла.**)\n",
+    "- `get_grandmother()`: возвращает бабушку текущей амёбы или `None`, если у амёбы нет бабушки (то есть она сама или её родитель были созданы человеком). (**1 балл.**)\n",
+    "- `get_cousins()`: возвращает список всех двоюродных братьев (то есть всех внуков моей бабушки, не являющихся моими родными братьями) или `None` если у неё нет бабушки. Если бабушка есть, но двоюродных братьев нет, то функция должна вернуть пустой список, а не `None`. (**3 балла.**)\n",
+    "- `is_relative_to(other)`: проверяет, является ли данная амёба родственницей амёбе `other`. Родственниками называются амёбы, если одна из них является предком другой, или если они имеют общего предка (например, дядя и его племянник — родственники, потому что бабушка племянника является мамой дяди). Каждый является родственником самому себе. (**4 балла.**) **Подсказка.** При написании этого метода полезно создать метод `_all_ancestors()`, возвращающий список всех предков. Вам также могут пригодиться множества (`set`)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 97,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "a7e1b15408f29ca8e49431eb54356325",
+     "grade_id": "Amoeba",
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "class Amoeba:\n",
+    "    def __init__(self, name, color, parent=None):\n",
+    "        self.name = name\n",
+    "        self.color = color\n",
+    "        self.age = 0\n",
+    "        self.parent = parent\n",
+    "        self.children = []\n",
+    "    def __repr__(self):\n",
+    "        return f\"Amoeba(name='{self.name}', color='{self.color}')\"\n",
+    "    def __str__(self):\n",
+    "        return f'<{self.color} amoeba named {self.name}>'\n",
+    "    def grow(self):\n",
+    "        self.age += 1\n",
+    "    def is_adult(self):\n",
+    "        return self.age >= 3\n",
+    "    def give_birth(self, name):\n",
+    "        if self.is_adult():\n",
+    "            new_amoeba = Amoeba(name, self.color, self)\n",
+    "            self.children.append(new_amoeba)\n",
+    "            return new_amoeba\n",
+    "        return None\n",
+    "    def is_eq(self, other): # метод для проверки на одинаковость двух амеб\n",
+    "        return self.name == other.name and self.color == other.color and self.age == other.age\n",
+    "    def get_brothers(self):\n",
+    "        if self.parent is None:\n",
+    "            return None\n",
+    "        else:\n",
+    "            result = []\n",
+    "            for elem in self.parent.children:\n",
+    "                if self.is_eq(elem):\n",
+    "                    pass\n",
+    "                else:\n",
+    "                    result.append(elem)\n",
+    "            return result\n",
+    "    def get_grandmother(self):\n",
+    "        if self.parent is None:\n",
+    "            return None\n",
+    "        else:\n",
+    "            return self.parent.parent\n",
+    "    def get_cousins(self):\n",
+    "        if self.get_grandmother() is None:\n",
+    "            return None\n",
+    "        else:\n",
+    "            result = []\n",
+    "            for parent in self.get_grandmother().children:\n",
+    "                if parent.is_eq(self.parent):\n",
+    "                    pass\n",
+    "                else:\n",
+    "                    if len(parent.children):\n",
+    "                        result.extend(parent.children)\n",
+    "            return result\n",
+    "    def _all_ancestors(self): # возвращает не только всех предков (т.к в множестве есть еще и сам элемент, который вызвал метод)\n",
+    "        result = []\n",
+    "        amoeba = self\n",
+    "        while not (amoeba is None):\n",
+    "            result.append(amoeba)\n",
+    "            amoeba = amoeba.parent\n",
+    "        return set(result)\n",
+    "    def is_relative_to(self, other):\n",
+    "        return not self._all_ancestors().isdisjoint(other._all_ancestors())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 98,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "dfcb1e65d37c195da05e996705fba875",
+     "grade": true,
+     "grade_id": "Amoeba_pr2t1",
+     "locked": true,
+     "points": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "laama = Amoeba(\"Laama\", \"green\")\n",
+    "assert laama.color == 'green'\n",
+    "assert laama.age == 0\n",
+    "assert laama.children == []\n",
+    "assert laama.parent is None\n",
+    "assert laama.name == \"Laama\"\n",
+    "\n",
+    "quuma = Amoeba(\"Quuma\", \"yellow\")\n",
+    "assert quuma.color == 'yellow'\n",
+    "assert quuma.age == 0\n",
+    "assert quuma.parent is None\n",
+    "assert laama.children == []\n",
+    "assert quuma.name == 'Quuma'"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 99,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "92b1f24902e8746a4d845f5b093030d5",
+     "grade": true,
+     "grade_id": "Amoeba_pr2tx_repr",
+     "locked": true,
+     "points": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "laama = Amoeba(\"Laama\", \"green\")\n",
+    "quuma = Amoeba(\"Quuma\", \"yellow\")\n",
+    "assert repr(laama) == \"Amoeba(name='Laama', color='green')\"\n",
+    "assert repr(quuma) == \"Amoeba(name='Quuma', color='yellow')\""
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 100,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "e2e41f4ee3d583179a3b4fff2a39cf11",
+     "grade": true,
+     "grade_id": "Amoeba_pr2tx_str",
+     "locked": true,
+     "points": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "laama = Amoeba(\"Laama\", \"green\")\n",
+    "quuma = Amoeba(\"Quuma\", \"yellow\")\n",
+    "assert str(laama) == '<green amoeba named Laama>'\n",
+    "assert str(quuma) == '<yellow amoeba named Quuma>'"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 101,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "61d587fa13b2574a9e9597157487b07a",
+     "grade": true,
+     "grade_id": "Amoeba_pr2t2",
+     "locked": true,
+     "points": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "laama = Amoeba(\"Laama\", \"green\")\n",
+    "for i in range(100):\n",
+    "    assert laama.age == i\n",
+    "    laama.grow()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 102,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "fc786d2f383897afbf4782473a9bdae6",
+     "grade": true,
+     "grade_id": "Amoeba_pr2t3",
+     "locked": true,
+     "points": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "laama = Amoeba(\"Laama\", \"green\")\n",
+    "assert not laama.is_adult()\n",
+    "laama.grow()\n",
+    "assert not laama.is_adult()\n",
+    "laama.grow()\n",
+    "assert not laama.is_adult()\n",
+    "laama.grow()\n",
+    "assert laama.is_adult()\n",
+    "laama.grow()\n",
+    "assert laama.is_adult()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 103,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "24bed7df52a37688a3f6bcf36c3a114c",
+     "grade": true,
+     "grade_id": "Amoeba_pr2t4",
+     "locked": true,
+     "points": 2,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "laama = Amoeba(\"Laama\", \"green\")\n",
+    "assert laama.give_birth(\"Laamiesh\") is None\n",
+    "assert laama.children == []\n",
+    "laama.grow()\n",
+    "laama.grow()\n",
+    "laama.grow()\n",
+    "child = laama.give_birth(\"Laamiesh\")\n",
+    "assert child is not None\n",
+    "assert child is laama.children[0]\n",
+    "assert child.parent is laama\n",
+    "assert child.color == laama.color\n",
+    "assert child.color == 'green'\n",
+    "\n",
+    "oldchild = child\n",
+    "\n",
+    "laama.grow()\n",
+    "child = laama.give_birth(\"Laamien\")\n",
+    "assert child is not None\n",
+    "assert child is laama.children[1]\n",
+    "assert child.color == laama.color\n",
+    "assert child.color == 'green'\n",
+    "assert child.parent is laama\n",
+    "assert oldchild != child"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 104,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "209aeb9827d100943217898d35a53db5",
+     "grade": true,
+     "grade_id": "Amoeba_pr2t5",
+     "locked": true,
+     "points": 2,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "laama = Amoeba(\"Laama\", \"green\")\n",
+    "laama.grow()\n",
+    "laama.grow()\n",
+    "laama.grow()\n",
+    "\n",
+    "child1 = laama.give_birth(\"Lammuq\")\n",
+    "child2 = laama.give_birth(\"Laamaq\")\n",
+    "child3 = laama.give_birth(\"Laameq\")\n",
+    "\n",
+    "\n",
+    "assert set(child1.get_brothers()) == set([child2, child3])\n",
+    "assert set(child2.get_brothers()) == set([child1, child3])\n",
+    "assert set(child3.get_brothers()) == set([child1, child2])\n",
+    "\n",
+    "assert laama.get_brothers() is None\n",
+    "\n",
+    "quuma = Amoeba(\"Quuma\", \"yellow\")\n",
+    "quuma.grow()\n",
+    "quuma.grow()\n",
+    "quuma.grow()\n",
+    "quuma_child = quuma.give_birth(\"Zzz\")\n",
+    "assert quuma_child.get_brothers() == []"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 105,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "7bb10bae3cd8755bb18cbd3a613dabfc",
+     "grade": true,
+     "grade_id": "Amoeba_pr2t6",
+     "locked": true,
+     "points": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "laama = Amoeba(\"Laama\", \"green\")\n",
+    "laama.grow()\n",
+    "laama.grow()\n",
+    "laama.grow()\n",
+    "xeema = laama.give_birth(\"Xeema\")\n",
+    "xeema.grow()\n",
+    "xeema.grow()\n",
+    "xeema.grow()\n",
+    "rooma = xeema.give_birth(\"Rooma\")\n",
+    "assert rooma.get_grandmother() is laama\n",
+    "assert xeema.get_grandmother() is None\n",
+    "assert laama.get_grandmother() is None"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 106,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "2cfbe32241745a0062765c6a3c25d6b4",
+     "grade": true,
+     "grade_id": "Amoeba_pr2t7",
+     "locked": true,
+     "points": 3,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "laama = Amoeba(\"Laama\", \"green\")\n",
+    "laama.grow()\n",
+    "laama.grow()\n",
+    "laama.grow()\n",
+    "\n",
+    "child1 = laama.give_birth(\"Child 1\")\n",
+    "child2 = laama.give_birth(\"Child 2\")\n",
+    "child3 = laama.give_birth(\"Child 3\")\n",
+    "\n",
+    "child1.grow()\n",
+    "child1.grow()\n",
+    "child1.grow()\n",
+    "\n",
+    "child2.grow()\n",
+    "child2.grow()\n",
+    "child2.grow()\n",
+    "\n",
+    "child3.grow()\n",
+    "child3.grow()\n",
+    "child3.grow()\n",
+    "\n",
+    "grandchild11 = child1.give_birth(\"Grandchild 1 1\")\n",
+    "grandchild12 = child1.give_birth(\"Grandchild 1 2\")\n",
+    "\n",
+    "grandchild21 = child2.give_birth(\"Grandchild 2 1\")\n",
+    "grandchild22 = child2.give_birth(\"Grandchild 2 2\")\n",
+    "grandchild23 = child2.give_birth(\"Grandchild 2 3\")\n",
+    "\n",
+    "grandchild31 = child3.give_birth(\"Grandchild 3 1\")\n",
+    "grandchild32 = child3.give_birth(\"Grandchild 3 2\")\n",
+    "grandchild33 = child3.give_birth(\"Grandchild 3 3\")\n",
+    "grandchild34 = child3.give_birth(\"Grandchild 3 4\")\n",
+    "\n",
+    "assert set(grandchild11.get_cousins()) == set([grandchild21, grandchild22, \n",
+    "                                              grandchild23, grandchild31,\n",
+    "                                              grandchild32, grandchild33,\n",
+    "                                              grandchild34])\n",
+    "\n",
+    "assert set(grandchild12.get_cousins()) == set([grandchild21, grandchild22, \n",
+    "                                              grandchild23, grandchild31,\n",
+    "                                              grandchild32, grandchild33,\n",
+    "                                              grandchild34])\n",
+    "\n",
+    "assert set(grandchild34.get_cousins()) == set([grandchild11, grandchild12,\n",
+    "                                              grandchild21, grandchild22,\n",
+    "                                              grandchild23])\n",
+    "\n",
+    "assert set(grandchild31.get_cousins()) == set([grandchild11, grandchild12,\n",
+    "                                              grandchild21, grandchild22,\n",
+    "                                              grandchild23])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 107,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "d9912593a2384db662b8e7263032881b",
+     "grade": true,
+     "grade_id": "Amoeba_pr2t8",
+     "locked": true,
+     "points": 4,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from itertools import product\n",
+    "\n",
+    "laama = Amoeba(\"Laama\", \"green\")\n",
+    "laama.grow()\n",
+    "laama.grow()\n",
+    "laama.grow()\n",
+    "\n",
+    "child1 = laama.give_birth(\"Child 1\")\n",
+    "child2 = laama.give_birth(\"Child 2\")\n",
+    "child3 = laama.give_birth(\"Child 3\")\n",
+    "\n",
+    "child1.grow()\n",
+    "child1.grow()\n",
+    "child1.grow()\n",
+    "\n",
+    "child2.grow()\n",
+    "child2.grow()\n",
+    "child2.grow()\n",
+    "\n",
+    "child3.grow()\n",
+    "child3.grow()\n",
+    "child3.grow()\n",
+    "\n",
+    "grandchild11 = child1.give_birth(\"Grandchild 1 1\")\n",
+    "grandchild12 = child1.give_birth(\"Grandchild 1 2\")\n",
+    "\n",
+    "grandchild21 = child2.give_birth(\"Grandchild 2 1\")\n",
+    "grandchild22 = child2.give_birth(\"Grandchild 2 2\")\n",
+    "grandchild23 = child2.give_birth(\"Grandchild 2 3\")\n",
+    "\n",
+    "grandchild31 = child3.give_birth(\"Grandchild 3 1\")\n",
+    "grandchild32 = child3.give_birth(\"Grandchild 3 2\")\n",
+    "grandchild33 = child3.give_birth(\"Grandchild 3 3\")\n",
+    "grandchild34 = child3.give_birth(\"Grandchild 3 4\")\n",
+    "\n",
+    "xeema = Amoeba(\"Xeema\", \"purple\")\n",
+    "xeema.grow()\n",
+    "xeema.grow()\n",
+    "xeema.grow()\n",
+    "\n",
+    "xeema_child1 = xeema.give_birth(\"Xeema Child 1\")\n",
+    "xeema_child2 = xeema.give_birth(\"Xeema Child 2\")\n",
+    "\n",
+    "xeema_child1.grow()\n",
+    "xeema_child1.grow()\n",
+    "xeema_child1.grow()\n",
+    "\n",
+    "xeema_child2.grow()\n",
+    "xeema_child2.grow()\n",
+    "xeema_child2.grow()\n",
+    "\n",
+    "xeema_grandchild11 = xeema_child1.give_birth(\"Xeema Grandchild 1 1\")\n",
+    "\n",
+    "xeema_grandchild21 = xeema_child2.give_birth(\"Xeema Grandchild 2 1\")\n",
+    "\n",
+    "laama_family = [laama, child1, child2, child3, grandchild11, grandchild12,\n",
+    "               grandchild21, grandchild22, grandchild23, grandchild31,\n",
+    "               grandchild32, grandchild32, grandchild33, grandchild34]\n",
+    "\n",
+    "xeema_family = [xeema, xeema_child1, xeema_child2, xeema_grandchild11, \n",
+    "                xeema_grandchild21]\n",
+    "\n",
+    "for lf1, lf2 in product(laama_family, repeat=2):\n",
+    "    assert lf1.is_relative_to(lf2)\n",
+    "\n",
+    "for xf1, xf2 in product(xeema_family, repeat=2):\n",
+    "    assert xf1.is_relative_to(xf2)\n",
+    "\n",
+    "for xf, lf in product(xeema_family, laama_family):\n",
+    "    assert not xf.is_relative_to(lf)\n",
+    "    assert not lf.is_relative_to(xf)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 2 (4 балла)\n",
+    "Рассмотрим следующий класс, описывающий абстрактное устройство."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 110,
+   "metadata": {
+    "nbgrader": {
+     "grade": false,
+     "locked": false,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "class Device(object):\n",
+    "    def __init__(self, name):\n",
+    "        self.name = name\n",
+    "        self.is_on = False\n",
+    "    def __str__(self):\n",
+    "        return f\"Device('{self.name}')\"\n",
+    "    def __repr__(self):\n",
+    "        return str(self)\n",
+    "    def turn_on(self):\n",
+    "        self.is_on = True\n",
+    "    def turn_off(self):\n",
+    "        self.is_on = False\n",
+    "    def toggle(self):\n",
+    "        self.is_on = not self.is_on"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Написать класс `TVSet`, наследующий от `Device` (то есть являющийся подклассом класса `Device`). \n",
+    "\n",
+    "1. Добавить в класс `TVSet` атрибут `channel`. Конструктор `TVSet` по-прежнему должен принимать на вход только `name`. При создании экземпляра класса `TVSet`, атрибут `channel` должен быть установлен в 1. Конструктор (`__init__`) класса `TVSet` должен вызывать материнский конструктор с помощью `super().__init__(…)`.\n",
+    "2. `repr` и `str` должны теперь возвращать строчку вида `\"TVSet('{name}')\"`.\n",
+    "3. Добавить метод `switch_channel()`, принимающий на вход канал (число) и меняющий атрибут `channel` соответствующим образом. При попытке поменять канал на не включенном телевизоре канал не должен меняться (ничего не должно происходить)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 115,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "ac9fa97f874342b397caf364aa7e577f",
+     "grade": false,
+     "grade_id": "pr2",
+     "locked": false,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "class TVSet(Device):\n",
+    "    def __init__(self, name):\n",
+    "        super().__init__(name)\n",
+    "        self.channel = 1\n",
+    "    \n",
+    "    def __str__(self):\n",
+    "        return f\"TVSet('{self.name}')\"\n",
+    "    def __repr__(self):\n",
+    "        return str(self)\n",
+    "    def switch_channel(self, channel):\n",
+    "        if self.is_on:\n",
+    "            self.channel = channel"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 116,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "2eed3f03a226b7266b0c853de260830a",
+     "grade": true,
+     "grade_id": "pr2t1",
+     "locked": true,
+     "points": 2,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "# Constructor\n",
+    "def test_constructor(cl):\n",
+    "    tvset = cl(\"TV\")\n",
+    "    assert tvset.is_on is False\n",
+    "    xbox = cl(\"Xbox\")\n",
+    "    assert xbox.is_on is False\n",
+    "    assert xbox is not tvset\n",
+    "\n",
+    "# turning on and off\n",
+    "def test_turn_on_off(cl):\n",
+    "    tvset = cl(\"TV\")\n",
+    "    xbox = cl(\"Xbox\")\n",
+    "    tvset.turn_on()\n",
+    "    assert tvset.is_on is True\n",
+    "    assert xbox.is_on is False\n",
+    "    tvset.turn_on()\n",
+    "    assert tvset.is_on is True\n",
+    "    assert xbox.is_on is False\n",
+    "    tvset.turn_off()\n",
+    "    assert tvset.is_on is False\n",
+    "    assert xbox.is_on is False\n",
+    "    tvset.turn_off()\n",
+    "    assert tvset.is_on is False\n",
+    "    assert xbox.is_on is False\n",
+    "\n",
+    "# toggling\n",
+    "def test_toggling(cl):\n",
+    "    tvset = cl(\"TV\")\n",
+    "    assert tvset.is_on is False\n",
+    "    tvset.toggle()\n",
+    "    assert tvset.is_on is True\n",
+    "    tvset.toggle()\n",
+    "    assert tvset.is_on is False\n",
+    "\n",
+    "# Subclassing tests\n",
+    "assert issubclass(TVSet, Device)\n",
+    "test_constructor(TVSet)\n",
+    "test_turn_on_off(TVSet)\n",
+    "test_toggling(TVSet)\n",
+    "\n",
+    "tvset = TVSet(\"tv1\")\n",
+    "assert str(tvset) == \"TVSet('tv1')\"\n",
+    "assert repr(tvset) == \"TVSet('tv1')\"\n",
+    "assert tvset.channel == 1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 117,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "5bbb5e05c9a2958ee679d03815f95ba7",
+     "grade": true,
+     "grade_id": "prt2",
+     "locked": true,
+     "points": 2,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "tvset = TVSet(\"tv1\")\n",
+    "# New method tests\n",
+    "assert tvset.is_on is False\n",
+    "tvset.channel = 42\n",
+    "tvset.switch_channel(2)\n",
+    "assert tvset.channel == 42\n",
+    "tvset.turn_on()\n",
+    "tvset.switch_channel(3)\n",
+    "assert tvset.channel == 3, \"Switch doesn't work\""
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Часть II: Numpy\n",
+    "\n",
+    "Во всех задачах словом «массив» обозначается объект типа `np.array`. Везде, где не оговорено обратное, запрещается пользоваться циклами и list comprehensions!\n",
+    "\n",
+    "_Некоторые задачи разработаны Ф. Тюриным. Часть задач взята из ДЗ№2 [этого курса](http://wiki.cs.hse.ru/Машинное_обучение_на_матфаке_2018/2019), составленного Евгением Ковалёвым по материалам задач Факультета компьютерных наук._"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 3 (1 балл)\n",
+    "Написать функцию `double_this(arr)`, принимающую на вход массив `arr`, состоящий из чисел, и возвращающую массив, полученный удвоением каждого элемента `arr`.\n",
+    "\n",
+    "**Подсказка:** Операции с массивами действуют поэлементно.\n",
+    "\n",
+    "**Ещё подсказка:** Нужно считать, что `arr` уже является `np.array`, преобразовывать его к этому типу не нужно. Например, для проверки вашей функции нужно запускать что-то вроде\n",
+    "\n",
+    "    dobule_this(np.array([1, 2, 3]))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 118,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "43c79dd1942cd9d76b84a278a055dda0",
+     "grade": false,
+     "grade_id": "cell-72c9fe58762a10c0",
+     "locked": false,
+     "schema_version": 1,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def double_this(arr):\n",
+    "    return arr * 2"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 119,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "6ddab0ba380ee2bc4ca22290d78e58fa",
+     "grade": true,
+     "grade_id": "cell-b74235c7044a3dc4",
+     "locked": true,
+     "points": 1,
+     "schema_version": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from timeit import timeit\n",
+    "import numpy as np\n",
+    "\n",
+    "def testme(f, inp, outp):\n",
+    "    q = f(np.array(inp))\n",
+    "    assert isinstance(q, np.ndarray), \"Функция должна возвращать массив numpy (np.array)\"\n",
+    "    assert np.array_equal(q, np.array(outp)), \"Ошибка для входного списка \"+str(np.array(inp))\n",
+    "def test(inp, outp):\n",
+    "    testme(double_this, inp, outp)\n",
+    "\n",
+    "test([1, 2, 3], [2, 4, 6])\n",
+    "test([1.1, 2.2, 3.3], [2.2, 4.4, 6.6])\n",
+    "test([1]*10, [2]*10)\n",
+    "test([1]*10+[2]*15, [2]*10+[4]*15)\n",
+    "\n",
+    "N = 1000000\n",
+    "\n",
+    "benchmark = timeit(\"[x*x for x in np.array([1]*N)]\", \"from __main__ import N, np\", number=1)\n",
+    "otherbenchmark = timeit(\"double_this(np.array([1]*N))\", \n",
+    "                        \"from __main__ import N, np, double_this\", number=1)\n",
+    "assert benchmark > otherbenchmark*2, \"Код работает слишком медленно — вы точно не пользовались циклами?\""
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 4 (1 балл)\n",
+    "Написать функцию `select_even(arr)`, принимающую на вход массив целых чисел `arr` и возвращающую новый массив, который состоит из всех *чётных* элементов `arr`.\n",
+    "\n",
+    "**Подсказка:** напомним, что все арифметические операции, а также операции сравнения, действуют на массивы поэлементно."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 122,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "81a5737332d6ea92452b0a62441bad74",
+     "grade": false,
+     "grade_id": "cell-af8e61df69375caf",
+     "locked": false,
+     "schema_version": 1,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def select_even(arr):\n",
+    "    return arr[arr % 2 == 0]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 123,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "ef2431c32e64a6de353bc087fb586bdb",
+     "grade": true,
+     "grade_id": "cell-91a6e40c1897a793",
+     "locked": true,
+     "points": 1,
+     "schema_version": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from timeit import timeit\n",
+    "import numpy as np\n",
+    "\n",
+    "def testme(f, inp, outp):\n",
+    "    q = f(np.array(inp))\n",
+    "    assert isinstance(q, np.ndarray), \"Функция должна возвращать массив numpy (np.array)\"\n",
+    "    assert np.array_equal(q, np.array(outp)), \"Ошибка для входного списка \"+str(np.array(inp))\n",
+    "def test(inp, outp):\n",
+    "    testme(select_even, inp, outp)\n",
+    "\n",
+    "test([1, 2, 3, 4, 5], [2, 4])\n",
+    "test([], [])\n",
+    "test([1, 3, 5], [])\n",
+    "test([5, 4, 3, 2, 0], [4, 2, 0])\n",
+    "test([100, 200, 300, 199, 299, 150], [100, 200, 300, 150])\n",
+    "\n",
+    "N = 100000\n",
+    "benchmark = timeit(\"[x for x in np.array([1]*N) if x*2]\", \"from __main__ import N, np\", number=1)\n",
+    "otherbenchmark = timeit(\"select_even(np.array([1]*N))\", \n",
+    "                        \"from __main__ import N, select_even, np\", number=1)\n",
+    "assert benchmark > otherbenchmark*2, \"Код работает слишком медленно — вы точно не пользовались циклами?\"\n",
+    "# should be at least two times faster than list comprehensions"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 5 (2 балла)\n",
+    "\n",
+    "Напишите функцию `closest_value(array, value)`, вычисляющую самое близкое и самое дальнее числа к данному в рассматриваемом массиве чисел. Например, если на вход поступают массив `array([0, 1, 2, 3, 4])` и число 1.33, то ответом будет `(1, 4)`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 130,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "ad7e3099c0176ce1271991bcb867ee43",
+     "grade": false,
+     "grade_id": "cell-af339756f876d8ec",
+     "locked": false,
+     "schema_version": 1,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def closest_value(array, value):\n",
+    "    diff = np.abs(array - value)\n",
+    "    farest = array[diff.argmax()]\n",
+    "    closest = array[diff.argmin()]\n",
+    "    return closest, farest"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 131,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "6a3a6c3f8121ae7903281860adb230b9",
+     "grade": true,
+     "grade_id": "cell-39245962d30b75b6",
+     "locked": true,
+     "points": 2,
+     "schema_version": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "assert closest_value(np.array([0, 1, 2, 3, 4]), 1.33) == (1, 4)\n",
+    "assert closest_value(np.array([0]), 0) == (0, 0)\n",
+    "assert closest_value(np.array([1, 1.1, 1.11, 1.111, 1.1111]), 100) == (1.1111, 1)\n",
+    "assert closest_value(np.array([-100, 400, 100500]), 0) == (-100, 100500)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 6 (2 балла)\n",
+    "Написать функцию `wipe_even(arr, target_value, in_place)`, принимающую на вход массив целых чисел `arr`, и возвращающую массив, полученный из `arr` путём замены всех чётных элементов на  `target_value`. Если `target_value` не указано, то оно должно считаться равным числу 0. Если указан параметр `in_place` и он равен `True`, то функция должна менять исходный массив, а если не указан или указан в `False`, то сохранять его неизменным (но возвращать изменённую согласно условию версию).\n",
+    "\n",
+    "**Подсказка.** Чтобы получить копию исходного массива можно использовать метод `.copy()`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 139,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "c143829557560662de720aff9cc547f1",
+     "grade": false,
+     "grade_id": "cell-fc70cb1401dd1ed5",
+     "locked": false,
+     "schema_version": 1,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def wipe_even(arr, target_value=0, in_place=False):\n",
+    "    if in_place:\n",
+    "        arr[arr % 2 == 0] = target_value\n",
+    "        return arr\n",
+    "    else:\n",
+    "        result = arr.copy()\n",
+    "        result[arr % 2 == 0] = target_value\n",
+    "        return result"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 140,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "337791e15174077c32207dfa7101ffe6",
+     "grade": true,
+     "grade_id": "cell-6853484289427d46",
+     "locked": true,
+     "points": 2,
+     "schema_version": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from timeit import timeit\n",
+    "import numpy as np\n",
+    "\n",
+    "def test(inp, outp, target=0, in_place=False):\n",
+    "    inp = np.array(inp)\n",
+    "    inp_backup = np.array(inp)\n",
+    "\n",
+    "    q = wipe_even(inp, target, in_place)\n",
+    "    assert isinstance(q, np.ndarray), \"Функция должна возвращать массив numpy (np.array)\"\n",
+    "    assert np.array_equal(q, np.array(outp)), \"Ошибка для входного списка \"+str(np.array(inp))\n",
+    "    if in_place:\n",
+    "        assert np.array_equal(inp, np.array(outp)), \"Функция должна менять исходный список\"\n",
+    "    else:\n",
+    "        assert np.array_equal(inp, inp_backup), \"Исходный список должен остаться неизменным\"\n",
+    "\n",
+    "test([1, 2, 3, 4, 5], [1, 0, 3, 0, 5], in_place=True)\n",
+    "test([], [], in_place=True)\n",
+    "test([1, 3, 5], [1, 3, 5], in_place=True)\n",
+    "test([5, 4, 3, 2, 0], [5, 0, 3, 0, 0], in_place=True)\n",
+    "test([100, 200, 300, 199, 299, 150], [0, 0, 0,  199, 299, 0], in_place=True)\n",
+    "\n",
+    "test([1, 2, 3, 4, 5], [1, 99, 3, 99, 5], target = 99, in_place=True)\n",
+    "\n",
+    "N = 100000\n",
+    "benchmark = timeit(\"[0 if x*2 else x for x in np.array([1]*N)]\", \n",
+    "                   \"from __main__ import np, N\", number=1)\n",
+    "otherbenchmark = timeit(\"wipe_even(np.array([1]*N), in_place=True)\", \n",
+    "                        \"from __main__ import np, N, wipe_even\", number=1)\n",
+    "assert benchmark > otherbenchmark*1.5, \"Код работает слишком медленно — вы точно не пользовались циклами?\""
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 7 (2 балла)\n",
+    "Написать функцию `weighted_sum(weights, grades, normalize)`, возвращающую взвешенную сумму оценок, записанных в массив `grades`, в соответствии с весами, записанными в массив `weights`. Например, для `weights = np.array([0.3, 0.3, 0.4])` и `grades = np.array([7, 9, 8])` функция должна вернуть число $0.3\\times 7+0.3\\times 9+0.4\\times 8=8.0$.\n",
+    "\n",
+    "Если параметр `normalize` установлен в `True`, а сумма всех весов отличается от 1, то следует умножить все веса на одно и то же число таким образом, чтобы их сумма была равна 1, в противном случае следует использовать веса «как есть», даже если их сумма отличается от 1. Если функция запущена без указания параметра `normalize`, следует считать, что `normalize = False`.\n",
+    "\n",
+    "**Подсказка:** Вам помогут функции `np.dot()` и `np.sum()`. Встроенная функция `sum()` также работает с массивами `numpy`, но гораздо медленнее (проверьте с помощью `%timeit`!) "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 145,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "e2b18d98a37a4c7b671f48e43f995399",
+     "grade_id": "pr_4",
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def weighted_sum(weights, grades, normalize=False):\n",
+    "    if normalize:\n",
+    "        weights = weights / np.sum(weights)\n",
+    "    return np.dot(weights, grades)\n",
+    "        "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 146,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "62b1220f5db8c588fe795792308e61c0",
+     "grade": true,
+     "grade_id": "pr_4_corr",
+     "locked": true,
+     "points": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from timeit import timeit\n",
+    "import numpy as np\n",
+    "\n",
+    "def test(w, g, out, normalize = False):\n",
+    "    q = weighted_sum(np.array(w), np.array(g), normalize)\n",
+    "    assert np.isclose(q, out)\n",
+    "\n",
+    "test([0.3, 0.3, 0.4], [7, 9, 8], 8)\n",
+    "test([0.1, 0.2, 0.3, 0.4], [1, 5, 3, 2], 2.8)\n",
+    "test([1, 2, 3, 4], [1, 5, 3, 2], 28)\n",
+    "test([1, 2, 3, 4], [1, 5, 3, 2], 2.8, normalize=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 147,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "995dd263f9d016fcaad58409a6dde3c3",
+     "grade": true,
+     "grade_id": "pr_4_perf",
+     "locked": true,
+     "points": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "N = 1000000\n",
+    "\n",
+    "test([1, 2, 3, 4], [1, 5, 3, 2], 28)\n",
+    "\n",
+    "benchmark = timeit(\"sum([x/x for x in np.array([1]*N)])\", \"from __main__ import N, np\", number=1)\n",
+    "otherbenchmark = timeit(\"weighted_sum(np.array([1.1]*N), np.array([1]*N), True)\", \n",
+    "                        \"from __main__ import N, weighted_sum, np\", number=1)\n",
+    "assert benchmark > otherbenchmark*1.7, \"Код работает слишком медленно — вы точно использовали методы numpy?\""
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 8 (2 балла)\n",
+    "Написать функцию `find_max(matrix)`, принимающую на вход матрицу `matrix` и возвращающую массив, элементами которого являются максимальные значения столбцов `matrix`. (Подсказка: поищите что-нибудь вроде *columnwise maximum numpy* в ближайшей поисковой системе. Таким образом решаются 99% проблем с `numpy`.)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 148,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "43106bbaa646551baf1c4e83be0c6740",
+     "grade": false,
+     "grade_id": "cell-6a57725279d3ea0d",
+     "locked": false,
+     "schema_version": 1,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def find_max(matrix):\n",
+    "    return np.amax(matrix, axis=0) "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 149,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "ee8a9e5a2afa3901461a20e949db8f10",
+     "grade": true,
+     "grade_id": "cell-be78b3c82687e665",
+     "locked": true,
+     "points": 2,
+     "schema_version": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "assert (find_max(np.array([[9, 9, 4], [8, 8, 1], [5, 3, 6], [3, 3, 3], [2, 1, 9]])) == np.array([9, 9, 9])).all()\n",
+    "assert (find_max(np.array([[0, 1, 2], [3, 4, 5], [6, 7, 8]])) == np.array([6, 7, 8])).all()\n",
+    "assert (find_max(np.array([[0, 1, 2], [3, 0, 5], [6, 7, 1]])) == np.array([6, 7, 5])).all()\n",
+    "assert (find_max(np.array([[-10, 1, 2, 5], [3, 30, 5, 17], [-100, -100, -100, 100], [1, 1, 2, -80]])) == \n",
+    "        np.array([3, 30, 5, 100])).all()\n",
+    "assert (find_max(np.array([[1]])) == np.array([1])).all()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 9 (2 балла)\n",
+    "\n",
+    "Напишите функцию `diag_prod(matrix)`, вычисляющую произведение всех ненулевых диагональных элементов на диагонали данной квадратной матрицы. Например, если на вход поступает матрица\n",
+    "$$\n",
+    "\\begin{pmatrix}\n",
+    "0 & 1 & 2\\\\\n",
+    "3 & 4 & 5\\\\\n",
+    "6 & 7 & 8\\\\\n",
+    "\\end{pmatrix},\n",
+    "$$\n",
+    "то ответом будет 32. Гарантируется, что на лиагонали матрицы будет хотя бы один ненулевой элемент.\n",
+    "\n",
+    "**Подсказка.** Функции, которые могут пригодиться при решении: `np.diag()`, `np.prod()`"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 155,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "1914692259d4470dcd5364b3b102e74a",
+     "grade": false,
+     "grade_id": "cell-85cbc27aeee5b164",
+     "locked": false,
+     "schema_version": 1,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def diag_prod(matrix):\n",
+    "    return np.prod(np.diag(matrix)[np.diag(matrix) != 0])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 156,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "292975b3f59263992873c7a1bc1e8c66",
+     "grade": true,
+     "grade_id": "cell-98d07fdc4faaff05",
+     "locked": true,
+     "points": 2,
+     "schema_version": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "assert diag_prod(np.array([[0, 1, 2], [3, 4, 5], [6, 7, 8]])) == 32\n",
+    "assert diag_prod(np.array([[0, 1, 2], [3, 0, 5], [6, 7, 1]])) == 1\n",
+    "assert diag_prod(np.array([[-10, 1, 2, 5], [3, 30, 5, 17], [-100, -100, -100, 100], [1, 1, 2, -80]])) == -2400000\n",
+    "assert diag_prod(np.array([[1]])) == 1"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 10 (2 балла)\n",
+    "\n",
+    "Напишите функцию `make_symmetric(matrix)`, делающую данную [треугольную матрицу](https://ru.wikipedia.org/wiki/%D0%A2%D1%80%D0%B5%D1%83%D0%B3%D0%BE%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F_%D0%BC%D0%B0%D1%82%D1%80%D0%B8%D1%86%D0%B0) симметричной. Например, если на вход поступает матрица\n",
+    "$$\n",
+    "\\begin{pmatrix}\n",
+    "1 & 2 & 3 & 4\\\\\n",
+    "0 & 5 & 6 & 7\\\\\n",
+    "0 & 0 & 8 & 9\\\\\n",
+    "0 & 0 & 0 & 10\\\\\n",
+    "\\end{pmatrix},\n",
+    "$$\n",
+    "то на выходе должна быть матрица\n",
+    "$$\n",
+    "\\begin{pmatrix}\n",
+    "1 & 2 & 3 & 4\\\\\n",
+    "2 & 5 & 6 & 7\\\\\n",
+    "3 & 6 & 8 & 9\\\\\n",
+    "4 & 7 & 9 & 10\\\\\n",
+    "\\end{pmatrix}.\n",
+    "$$\n",
+    "Использовать условные операторы и циклы нельзя."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 157,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "9150f91ae8e293bad06ef2a59bee96a8",
+     "grade": false,
+     "grade_id": "cell-c8289e3c26a3b2b6",
+     "locked": false,
+     "schema_version": 1,
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def make_symmetric(matrix):\n",
+    "    return matrix + matrix.T - np.diag(matrix.diagonal())"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 158,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "f68d0e4fa61598584d92c699ffb4976c",
+     "grade": true,
+     "grade_id": "cell-fbeb4e51bfc89440",
+     "locked": true,
+     "points": 2,
+     "schema_version": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "assert (make_symmetric(np.array([[1, 2, 3, 4], [0, 5, 6, 7], [0, 0, 8, 9], [0, 0, 0, 10]])) ==\n",
+    "        np.array([[1, 2, 3, 4], [2, 5, 6, 7], [3, 6, 8, 9], [4, 7, 9, 10]])).all()\n",
+    "assert (make_symmetric(np.array([[0, 0, 0, 0], [0, 9, 8, 0], [0, 0, -100, -1000], [0, 0, 0, 999]])) ==\n",
+    "        np.array([[0, 0, 0, 0], [0, 9, 8, 0], [0, 8, -100, -1000], [0, 0, -1000, 999]])).all()\n",
+    "assert (make_symmetric(np.array([[1]])) == np.array([[1]])).all()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 11 (2 балла)\n",
+    "Написать функцию `mean_by_gender(grades, genders)`, принимающую на вход два массива одинаковой длины: в массиве `grades` записаны оценки некоторых студентов, а в массиве `genders` — их пол в виде строк `male` или `female`. Требуется вернуть словарь, ключами которого будут строки `male` и `female`, а записями — среднее арифметическое оценок студентов соответствующего пола.\n",
+    "\n",
+    "Например, если `grades = np.array([5, 4, 3, 5, 2])` и `genders = np.array([\"female\", \"male\", \"male\", \"female\", \"male\"])`, функция должна вернуть словарь `{'male': 3.0, 'female': 5.0}`.\n",
+    "\n",
+    "**Подсказка.** Для быстрого вычисления среднего есть функция `np.mean()` или соответствующий метод у объектов типа `numpy.array`."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 168,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "960ff9a127927506d777d84e0c4e61be",
+     "grade_id": "pr_5",
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def mean_by_gender(grades, genders):\n",
+    "    return {'male': np.mean(grades[genders == 'male']), \n",
+    "            'female': np.mean(grades[genders == 'female'])}"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 169,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "152b65c211db84bec3cbbf3115473b50",
+     "grade": true,
+     "grade_id": "pr_5_t",
+     "locked": true,
+     "points": 2,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from timeit import timeit\n",
+    "import numpy as np\n",
+    "\n",
+    "def test(grades, genders, outp):\n",
+    "    ret = mean_by_gender(np.array(grades), np.array(genders))\n",
+    "    assert np.isclose(ret['female'], outp['female'])\n",
+    "    assert np.isclose(ret['male'], outp['male'])\n",
+    "\n",
+    "test([5, 4, 3, 5, 2], [\"female\", \"male\", \"male\", \"female\", \"male\"], {'male': 3.0, 'female': 5.0})\n",
+    "test([1, 0]*10, ['female', 'male']*10, {'female': 1, 'male': 0})\n",
+    "test(range(100), ['female', 'male']* 50, {'female': 49.0, 'male': 50.0})\n",
+    "test(list(range(100))+[100], ['male']*100+['female'], {'male':49.5, 'female': 100.0})\n",
+    "# mean_by_gender(np.array(range(100)), ['female', 'male']* 50)\n",
+    "\n",
+    "def benchmark_test(a, b):\n",
+    "    xx = 0\n",
+    "    yy = 0\n",
+    "    im = 0\n",
+    "    fi = 0\n",
+    "    for x, y in zip(a, b):\n",
+    "        if x != y:\n",
+    "            xx += x\n",
+    "            yy += x\n",
+    "            im += 1\n",
+    "            fi += 1\n",
+    "\n",
+    "    return xx+yy\n",
+    "\n",
+    "N = int(1E5)\n",
+    "grades = np.array([1.1]*N + [2.2]*N)\n",
+    "genders = np.array(['male']*N + ['female']*N)\n",
+    "\n",
+    "benchmark = timeit(\"assert np.isclose(mean_by_gender(grades, genders)['male'], 1.1)\",\n",
+    "                   \"from __main__ import np, mean_by_gender, grades, genders\",\n",
+    "                   number=1)\n",
+    "reference_benchmark = timeit(\"benchmark_test(grades, genders)\",\n",
+    "                             \"from __main__ import benchmark_test, grades, genders\",\n",
+    "                             number=1)\n",
+    "\n",
+    "assert reference_benchmark > benchmark * 10, \"Код работает слишком медленно — вы точно использовали методы numpy?\""
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Задача 15 (3 балла)\n",
+    "\n",
+    "В некотором царстве, в некотором государстве, налог на доходы физических лиц вычисляется следующим образом. Базовая ставка налога составляет 13%. Если в каком-то месяце ваш заработок за год составит больше тысячи тугриков, то на оставшуюся часть года (не включая этот месяц) устанавливается ставка в 20%. Например, если вы зарабатываете каждый месяц 150 тугриков, то к июлю заработаете $150\\times 7 = 1050$ тугриков и начиная с августа подоходный налог будет начисляться по ставке 20%. Написать функцию `calculate_tax(income)`, принимающую на вход массив, содержащий доход за каждый месяц года, начиная с первого и возвращающую общую сумму налога, который предстоит заплатить за год. Год в некотором царстве может длиться более 12 месяцев, если по этому поводу будет принят соответствующий высочайший декрет.\n",
+    "\n",
+    "**Подсказка.** Вам поможет функция `np.cumsum()`. Чтобы создать новый массив, длина которого равна длине какого-то другого, можно использовать функции `np.zeros_like()` или `np.ones_like()`.\n",
+    "\n",
+    "В этой задаче можно использовать `if` ровно один раз."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 197,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "47a4b2ced00e1a4079d54f79f2273ee9",
+     "grade_id": "pr_6",
+     "solution": true
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def calculate_tax(income):\n",
+    "    income_cumsum = np.zeros_like(income)\n",
+    "    np.cumsum(income, out=income_cumsum)\n",
+    "    return np.sum(income[income_cumsum - income <= 1000] * 0.13) + np.sum(income[income_cumsum - income > 1000] * 0.20)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 198,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "a60d42eaf5b86637552c55277a7ce529",
+     "grade": true,
+     "grade_id": "pr_6_t1",
+     "locked": true,
+     "points": 2,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "from timeit import timeit\n",
+    "import numpy as np\n",
+    "\n",
+    "assert np.isclose(calculate_tax(np.array([150]*12)), 286.5)\n",
+    "assert np.isclose(calculate_tax(np.array([100]*12)), 163)\n",
+    "assert np.isclose(calculate_tax(np.array([50]*12)), 78)\n",
+    "assert np.isclose(calculate_tax(np.array([1000]*12)), 2260)\n",
+    "\n",
+    "assert np.isclose(calculate_tax(np.array(range(12))*100), 1215)\n",
+    "assert np.isclose(calculate_tax(np.array(range(11,-1,-1))*100), 1243)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 199,
+   "metadata": {
+    "deletable": false,
+    "nbgrader": {
+     "checksum": "0eb7f58dd198c131a96c5cf7bc064261",
+     "grade": true,
+     "grade_id": "pr_6_t2",
+     "locked": true,
+     "points": 1,
+     "solution": false
+    }
+   },
+   "outputs": [],
+   "source": [
+    "def dummy(x):\n",
+    "    z = 0\n",
+    "    for y in x:\n",
+    "        z += y\n",
+    "        z += y*0.12\n",
+    "        if z:\n",
+    "            z += y\n",
+    "    return z\n",
+    "\n",
+    "assert np.isclose(calculate_tax(np.array(range(12))*100), 1215)\n",
+    "\n",
+    "N = int(1E6)\n",
+    "arr = np.array([1]*N)\n",
+    "benchmark = timeit(\"calculate_tax(arr)\", \"from __main__ import calculate_tax, arr\", number=1)\n",
+    "reference_benchmark = timeit(\"dummy(arr)\", \"from __main__ import dummy, arr\", number=1)\n",
+    "\n",
+    "assert reference_benchmark > benchmark*5, \"Код работает слишком медленно — вы точно использовали методы numpy?\""
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  },
+  "toc": {
+   "toc_cell": false,
+   "toc_number_sections": false,
+   "toc_threshold": 6,
+   "toc_window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
