@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{% endblock %}</title>
+    <link href="{% static "order.css" %}" rel="stylesheet">
+    <link rel="shortcut icon"  href="{% static "images/logo.ico" %}" type="image/png">
+    {% block links %}{% endblock %}
+</head>
+<body class="page__body">
+<header class="header">
+    <div class="header__logo logo">
+        <img class="logo__image" src="{% static "images/logo.ico" %}" width="40" height="44" alt="">
+        <p class="logo__title"><a class="invisible-link" href="/"> Поликлиники города</a></p>
+        <p class="logo__tagline"><a class="invisible-link" href="/">Запись к врачу онлайн</a></p>
+    </div>
+    <nav class="header__menu menu">
+        <button class="menu__button" type="button" aria-expanded="false" aria-controls="menu__list">
+            <svg class="menu__icon" aria-hidden="true" width="32" height="32">
+                <use class="menu__icon-menu" href="{% static "images/sprite_button.svg#menu" %}"></use>
+                <use class="menu__icon-cross"
+                     href="{% static "images/sprite.svg#cross" %}"></use>
+            </svg>
+        </button>
+        <ul class="menu__list" id="menu__list">
+            <li class="menu__item">
+                <a class="menu__link" href="">Элемент меню</a>
+            </li>
+            <li class="menu__item">
+                <a class="menu__link" href="">Элемент меню</a>
+            </li>
+            <li class="menu__item">
+                <a class="menu__link" href="">Элемент меню</a>
+            </li>
+            <li class="menu__item">
+                <a class="menu__link"></a>
+            </li>
+            <li class="menu__item">
+                <a class="menu__link" href="">Элемент меню</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+    {% block content %}
+
+
+    {% endblock %}
+</main>
+
+<a name="contacts"></a>
+<footer class="footer">
+
+    <ul class="footer__list">
+        <li class="footer__list__item">
+            <p class="footer__list__item__text">E-mail:</p>
+            <p class="footer__list__item__text"><a class="menu__link" href="">example@mail.ru</a>
+            </p>
+        </li>
+        <li class="footer__list__item">
+            <p class="footer__list__item__text">Режим работы:</p>
+            <p class="footer__list__item__text">с 9:00 до 19:00</p>
+        </li>
+        <li class="footer__list__item">
+            <p class="footer__list__item__text">Наш телефон:</p>
+            <p class="footer__list__item__text">+7(926)986-99-81</p>
+        </li>
+        <li class="footer__list__item">
+            <p class="footer__list__item__text">Дизайн: <a class="menu__link"
+                                                           href="">Дизайнер</a></p>
+        </li>
+    </ul>
+</footer>
+<script src="{% static "index.js" %}"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+    Запись к врачу
+{% endblock %}
+{% block links %}
+{#    <link href="{% static "files/css/main.css" %}" rel="stylesheet">#}
+{% endblock %}
+{% block content %}
+    <h3 class="form_main__title">Заполните форму и запишитесь к врачу</h3>
+    <a class="product__form__button" href="{% url 'registration:order_create' %}">Записаться</a>
+{% endblock %}
