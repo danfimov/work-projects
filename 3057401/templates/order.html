@@ -1,13 +1,57 @@
 {% extends "base.html" %}
 
 {% block title %}Checkout{% endblock %}
+{% block links %}
+    <style>
+        .order-form p{
+            display: flex;
+            flex-direction: column;
+        }
 
+        select{
+            width: 279px;
+            height: 50px;
+            border-radius: 25px;
+            padding: 5px 13px;
+            background-color: #555FCC;
+            color: white;
+            border: 1px solid white;
+            font: 20px monospace;
+        }
+
+        input{
+            width: 279px;
+            height: 50px;
+            border-radius: 25px;
+            padding: 5px 13px;
+            background-color: #555FCC;
+            color: white;
+            border: 1px solid white;
+            font: 20px monospace;
+        }
+
+        label{
+            margin: 5px 0 15px;
+        }
+
+        .order-form{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-column-gap: 107px;
+            grid-row-gap: 10px;
+        }
+
+        .button-link{
+            margin-top: 43px;
+        }
+    </style>
+{% endblock %}
 {% block content %}
-    <h1>Checkout</h1>
+    <h2>Заполните заявку</h2>
 
     <form action="." method="post" class="order-form">
         {{ form.as_p }}
-        <p><input type="submit" value="Записаться к врачу"></p>
+        <p ><input type="submit" class="button-link" value="Записаться к врачу" style="text-decoration: none; color: #555FCC; display: block; background-color: white; padding: 10px 19px; border-radius: 25px; font-weight: bolder"></p>
         {% csrf_token %}
     </form>
 {% endblock %}

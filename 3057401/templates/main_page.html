@@ -4,9 +4,29 @@
     Запись к врачу
 {% endblock %}
 {% block links %}
-{#    <link href="{% static "files/css/main.css" %}" rel="stylesheet">#}
+    {#    <link href="{% static "files/css/main.css" %}" rel="stylesheet">#}
 {% endblock %}
 {% block content %}
-    <h3 class="form_main__title">Заполните форму и запишитесь к врачу</h3>
-    <a class="product__form__button" href="{% url 'registration:order_create' %}">Записаться</a>
+    <h2>Онлайн регистратура</h2>
+    <p style="width: 100%; text-align: center">Как это устроено?</p>
+    <ul style="list-style: none; display: grid; grid-template-columns: 1fr 1fr 1fr; margin: 20px 160px; grid-gap: 56px">
+        <li style="padding: 10px; max-width: 285px">
+            <h3>Всё с компьютера</h3>
+            <p>Для того, чтобы записаться к врачу, больше не нужно выходить из дома.</p>
+        </li>
+        <li style="padding: 10px; max-width: 285px">
+            <h3>Без очередей</h3>
+            <p>Не нужно ждат, пока нерасторопные люди перед тобой впишут свои данные в один бланк
+                на 100 человек</p>
+        </li>
+        <li style="padding: 10px; max-width: 285px">
+            <h3>Ничего лишнего</h3>
+            <p>Просто укажите, к какому врачу и в какое время вы можете прийти. Для записи нужны
+                ваши ФИО и СНИЛС.</p>
+        </li>
+    </ul>
+    <a href="{% url 'registration:order_create' %}"
+       style="text-decoration: none; color: #555FCC; display: block; background-color: white; padding: 10px 19px; border-radius: 25px; font-weight: bolder">Записаться
+        к врачу</a>
+
 {% endblock %}

@@ -5,49 +5,60 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{% endblock %}</title>
-    <link href="{% static "order.css" %}" rel="stylesheet">
-    <link rel="shortcut icon"  href="{% static "images/logo.ico" %}" type="image/png">
+    <link href="{% static "index.css" %}" rel="stylesheet">
+    <link rel="shortcut icon" href="{% static "images/logo.ico" %}" type="image/png">
     {% block links %}{% endblock %}
 </head>
 <body class="page__body">
 <header class="header">
     <div class="header__logo logo">
         <img class="logo__image" src="{% static "images/logo.ico" %}" width="40" height="44" alt="">
-        <p class="logo__title"><a class="invisible-link" href="/"> Поликлиники города</a></p>
-        <p class="logo__tagline"><a class="invisible-link" href="/">Запись к врачу онлайн</a></p>
+        <p class="logo__title"><a class="invisible-link" href="/">Регистратура</a></p>
+        <p class="logo__tagline"><a class="invisible-link" href="/">Онлайн</a></p>
     </div>
     <nav class="header__menu menu">
         <button class="menu__button" type="button" aria-expanded="false" aria-controls="menu__list">
             <svg class="menu__icon" aria-hidden="true" width="32" height="32">
-                <use class="menu__icon-menu" href="{% static "images/sprite_button.svg#menu" %}"></use>
+                <use class="menu__icon-menu"
+                     href="{% static "images/sprite_button.svg#menu" %}"></use>
                 <use class="menu__icon-cross"
                      href="{% static "images/sprite.svg#cross" %}"></use>
             </svg>
         </button>
         <ul class="menu__list" id="menu__list">
             <li class="menu__item">
-                <a class="menu__link" href="">Элемент меню</a>
+                <a class="menu__link" href="">Запись на прием</a>
             </li>
             <li class="menu__item">
-                <a class="menu__link" href="">Элемент меню</a>
+                <a class="menu__link" href="">Расписание</a>
             </li>
             <li class="menu__item">
-                <a class="menu__link" href="">Элемент меню</a>
+                <a class="menu__link" href="">Справочник</a>
             </li>
             <li class="menu__item">
                 <a class="menu__link"></a>
             </li>
             <li class="menu__item">
-                <a class="menu__link" href="">Элемент меню</a>
+                <a class="menu__link" href="">Помощь</a>
             </li>
         </ul>
     </nav>
 </header>
-<main class="main">
-    {% block content %}
+<main class="main" style="padding: 0">
+    <div style="display: flex; flex-direction: column">
+        <img src="{% static "images/banner.png" %}" alt="big banner" style="margin: 5px auto">
+        <p style="margin: 5px auto; font: 30px sans-serif; color: #555FCC">Запись к врачу
+            <text style="color: #EC8C79; font-weight: bolder">Онлайн</text>
+            и без очередей!
+        </p>
+    </div>
+    <div style="width: 100%; padding: 10px; background-color: #555FCC; color: white; display: flex; flex-direction: column; justify-content: center; font: 20px sans-serif; align-items: center; margin: 20px 0; padding-bottom: 40px">
+
+        {% block content %}
 
 
-    {% endblock %}
+        {% endblock %}
+    </div>
 </main>
 
 <a name="contacts"></a>
